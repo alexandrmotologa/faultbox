@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+import asyncio
 from typing import TYPE_CHECKING, Any
 
-from fastapi import APIRouter, HTTPException, Response, status
+from fastapi import APIRouter, HTTPException, Response, WebSocket, WebSocketDisconnect, status
+from fastapi.responses import HTMLResponse
 
 from faultbox.api.schemas import (
     MessageResponse,
@@ -13,6 +15,7 @@ from faultbox.api.schemas import (
     ToxicCreateRequest,
     ToxicResponse,
 )
+from faultbox.api.ui import get_ui_html
 from faultbox.core.metrics import generate_prometheus_metrics
 from faultbox.toxics.factory import create_toxic
 
@@ -23,6 +26,24 @@ if TYPE_CHECKING:
 def create_router(manager: ProxyManager) -> APIRouter:
     """Create configured control plane router bound to a ProxyManager instance."""
     router = APIRouter()
+
+    @router.get("/", response_class=HTMLResponse)
+    @router.get("/ui", response_class=HTMLResponse)
+    async def dashboard_ui() -> HTMLResponse:
+        """Serve embedded single-page Web UI dashboard."""
+        return HTMLResponse(get_ui_html())
+
+    @router.websocket("/ws/telemetry")
+    async def websocket_telemetry(websocket: WebSocket) -> None:
+        """Stream real-time proxy metrics and status to connected browser clients."""
+        await websocket.accept()
+        try:
+            while True:
+                payload = [p.to_dict() for p in manager.list_proxies()]
+                await websocket.send_json(payload)
+                await asyncio.sleep(1.0)
+        except (WebSocketDisconnect, asyncio.CancelledError):
+            pass
 
     @router.get("/healthz", response_model=MessageResponse)
     async def healthcheck() -> MessageResponse:
