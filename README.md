@@ -20,9 +20,15 @@ FaultBox runs as a standalone process or Docker container. You point your applic
   - Corrupt: mutates random payload bytes or bit values.
   - Slicer: breaks large payloads into small fragments with micro-delays.
   - Flapping: alternates between healthy and broken states on a fixed schedule.
+  - Waveform Latency: generates dynamic curves (sine waves, sawtooth ramps, burst spikes, brownian walk).
   - HTTP Error: intercepts HTTP responses and overrides status codes (429, 500, 502, 503, 504).
+  - gRPC Fault: injects synthetic gRPC error trailers and status codes (UNAVAILABLE, DEADLINE_EXCEEDED).
+  - TLS Fault: simulates SSL handshake failures, bad certificates, and TLS alert records.
+- Python Client SDK & Pytest Plugin: programmatic chaos injection with scoped context managers (`with client.toxic(...)`).
 - REST control plane: manage proxies, toxics, and metrics at runtime via HTTP endpoints.
+- Web UI Dashboard: single-page browser interface with live WebSocket telemetry at `http://127.0.0.1:8474/`.
 - Terminal dashboard: live terminal interface using Rich to observe traffic and toggle toxics.
+- Prometheus Metrics: native `/metrics` endpoint for Prometheus and Grafana monitoring.
 - Declarative scenarios: automate timed chaos experiments using YAML scenario files in CI/CD pipelines.
 
 ## Quickstart
@@ -62,12 +68,28 @@ Clear all active toxics to restore normal traffic:
 faultbox proxy reset redis-test
 ```
 
+### Automated Testing with Python SDK
+
+```python
+from faultbox.client import FaultBoxClient
+
+client = FaultBoxClient("http://127.0.0.1:8474")
+
+# Chaos rule is active only within the scope of this with block
+with client.toxic("redis-test", "latency", latency_ms=400):
+    response = service.fetch_data()
+    assert response is not None
+```
+
 ## Documentation
 
 - [Architecture](docs/ARCHITECTURE.md): Proxy design, pipeline mechanics, and socket management.
 - [Toxic Reference](docs/TOXICS.md): Complete list of toxic attributes and configuration options.
+- [Client SDK](docs/CLIENT_SDK.md): Python SDK, context managers, and Pytest fixture integration.
 - [Scenarios](docs/SCENARIOS.md): Declarative YAML chaos test syntax and CI/CD integration.
 - [REST API](docs/API.md): Control plane endpoint specifications with request and response examples.
+- [Prometheus Metrics](docs/METRICS.md): Metrics exposition and scrape configuration.
+- [Web Dashboard](docs/DASHBOARD.md): Browser UI overview and WebSocket telemetry.
 
 ## License
 
