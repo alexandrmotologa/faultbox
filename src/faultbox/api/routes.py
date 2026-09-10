@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, Response, status
 
 from faultbox.api.schemas import (
     MessageResponse,
@@ -13,6 +13,7 @@ from faultbox.api.schemas import (
     ToxicCreateRequest,
     ToxicResponse,
 )
+from faultbox.core.metrics import generate_prometheus_metrics
 from faultbox.toxics.factory import create_toxic
 
 if TYPE_CHECKING:
@@ -26,6 +27,12 @@ def create_router(manager: ProxyManager) -> APIRouter:
     @router.get("/healthz", response_model=MessageResponse)
     async def healthcheck() -> MessageResponse:
         return MessageResponse(status="ok", message="FaultBox Control Plane operational")
+
+    @router.get("/metrics")
+    async def metrics() -> Response:
+        """Prometheus text exposition format endpoint."""
+        content = generate_prometheus_metrics(manager)
+        return Response(content=content, media_type="text/plain; version=0.0.4; charset=utf-8")
 
     @router.get("/proxies", response_model=list[ProxyResponse])
     async def list_proxies() -> list[dict[str, Any]]:
