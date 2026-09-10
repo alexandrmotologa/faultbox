@@ -1,4 +1,22 @@
-# FaultBox
+<p align="center">
+  <img src="docs/images/logo.png" alt="FaultBox Logo" width="140" style="border-radius: 20px;" />
+</p>
+
+<h1 align="center">FaultBox</h1>
+
+<p align="center">
+  <strong>Programmable network and protocol chaos injection proxy for distributed systems resilience testing.</strong>
+</p>
+
+<p align="center">
+  <a href="https://github.com/alexandrmotologa/faultbox/actions"><img src="https://img.shields.io/github/actions/workflow/status/alexandrmotologa/faultbox/ci.yml?branch=main&label=CI&logo=github" alt="CI" /></a>
+  <a href="https://pypi.org/project/faultbox/"><img src="https://img.shields.io/badge/python-3.12%2B-blue.svg" alt="Python Version" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License: MIT" /></a>
+</p>
+
+<p align="center">
+  <img src="docs/images/dashboard-overview.png" alt="FaultBox Real-Time Web Dashboard" width="880" />
+</p>
 
 FaultBox is a programmable network and protocol chaos injection proxy written in Python 3.12. It sits between client applications and upstream services such as databases, message brokers, and HTTP APIs to simulate network degradation, timeouts, rate limits, data corruption, and protocol errors.
 
@@ -12,7 +30,7 @@ FaultBox runs as a standalone process or Docker container. You point your applic
 
 - Asynchronous TCP proxy built on Python `asyncio`.
 - Bidirectional toxic chains: apply disruptions to incoming client requests, outgoing upstream responses, or both.
-- Eight built-in toxic types:
+- Eleven built-in toxic types:
   - Latency: adds configurable delays with optional jitter.
   - Bandwidth: throttles throughput using a token bucket rate limiter.
   - Reset Peer: abruptly terminates TCP connections with `SO_LINGER` set to 0.
@@ -30,6 +48,10 @@ FaultBox runs as a standalone process or Docker container. You point your applic
 - Terminal dashboard: live terminal interface using Rich to observe traffic and toggle toxics.
 - Prometheus Metrics: native `/metrics` endpoint for Prometheus and Grafana monitoring.
 - Declarative scenarios: automate timed chaos experiments using YAML scenario files in CI/CD pipelines.
+
+<p align="center">
+  <img src="docs/images/dashboard-modal-toxic.png" alt="FaultBox Interactive Toxic Configuration" width="800" />
+</p>
 
 ## Quickstart
 

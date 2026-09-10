@@ -22,6 +22,10 @@ Or:
 http://127.0.0.1:8474/ui
 ```
 
+<p align="center">
+  <img src="images/dashboard-overview.png" alt="FaultBox Web Dashboard Overview" width="850" />
+</p>
+
 ## Features
 
 ### 1. Cluster Traffic KPIs
@@ -47,3 +51,8 @@ Click **+ Toxic** on any proxy to open the toxic attachment modal:
 - Adjust toxicity probability (from `0.0` to `1.0`).
 - Pre-filled JSON attribute templates ensure quick parameter modification.
 - Individual toxics can be disabled or deleted directly from the active badges list.
+
+<p align="center">
+  <img src="images/dashboard-modal-toxic.png" alt="FaultBox Interactive Toxic Injection Modal" width="750" />
+</p>
+
