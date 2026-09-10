@@ -8,11 +8,13 @@ from faultbox.toxics.bandwidth import BandwidthToxic
 from faultbox.toxics.base import BaseToxic, ToxicDirection
 from faultbox.toxics.corrupt import CorruptToxic
 from faultbox.toxics.flapping import FlappingToxic
+from faultbox.toxics.grpc_fault import GrpcFaultToxic
 from faultbox.toxics.http_error import HttpErrorToxic
 from faultbox.toxics.latency import LatencyToxic
 from faultbox.toxics.reset_peer import ResetPeerToxic
 from faultbox.toxics.slicer import SlicerToxic
 from faultbox.toxics.timeout import TimeoutToxic
+from faultbox.toxics.tls_fault import TlsFaultToxic
 from faultbox.toxics.waveform_latency import WaveformLatencyToxic
 
 TOXIC_REGISTRY: dict[str, type[BaseToxic]] = {
@@ -25,6 +27,8 @@ TOXIC_REGISTRY: dict[str, type[BaseToxic]] = {
     "slicer": SlicerToxic,
     "flapping": FlappingToxic,
     "http_error": HttpErrorToxic,
+    "grpc_fault": GrpcFaultToxic,
+    "tls_fault": TlsFaultToxic,
 }
 
 

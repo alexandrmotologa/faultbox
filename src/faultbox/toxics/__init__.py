@@ -5,11 +5,13 @@ from faultbox.toxics.base import BaseToxic, StreamContext, ToxicDirection
 from faultbox.toxics.corrupt import CorruptToxic
 from faultbox.toxics.factory import TOXIC_REGISTRY, create_toxic
 from faultbox.toxics.flapping import FlappingToxic
+from faultbox.toxics.grpc_fault import GrpcFaultToxic
 from faultbox.toxics.http_error import HttpErrorToxic
 from faultbox.toxics.latency import LatencyToxic
 from faultbox.toxics.reset_peer import ResetPeerToxic
 from faultbox.toxics.slicer import SlicerToxic
 from faultbox.toxics.timeout import TimeoutToxic
+from faultbox.toxics.tls_fault import TlsFaultToxic
 from faultbox.toxics.waveform_latency import WaveformLatencyToxic
 
 __all__ = [
@@ -18,12 +20,14 @@ __all__ = [
     "BaseToxic",
     "CorruptToxic",
     "FlappingToxic",
+    "GrpcFaultToxic",
     "HttpErrorToxic",
     "LatencyToxic",
     "ResetPeerToxic",
     "SlicerToxic",
     "StreamContext",
     "TimeoutToxic",
+    "TlsFaultToxic",
     "ToxicDirection",
     "WaveformLatencyToxic",
     "create_toxic",

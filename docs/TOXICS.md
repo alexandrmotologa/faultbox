@@ -190,3 +190,42 @@ Adds dynamic, time-varying latency following mathematical waveforms (sine, sawto
 faultbox toxic add my-proxy rush-hour --type waveform_latency --attributes '{"base_latency_ms": 50, "amplitude_ms": 300, "period_sec": 30.0, "waveform": "sawtooth"}'
 ```
 
+---
+
+## 10. gRPC Fault (`grpc_fault`)
+
+Intercepts gRPC calls and returns synthetic gRPC trailers containing configurable error status codes (e.g. `UNAVAILABLE`, `DEADLINE_EXCEEDED`, `PERMISSION_DENIED`).
+
+### Attributes
+
+| Attribute | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `grpc_status` | integer | `14` | Canonical gRPC status code (14 = UNAVAILABLE, 4 = DEADLINE_EXCEEDED) |
+| `grpc_message` | string | `Service Unavailable (faultbox chaos)` | Error diagnostic description |
+
+### Example
+
+```bash
+faultbox toxic add grpc-proxy drop-call --type grpc_fault --direction outbound --attributes '{"grpc_status": 14, "grpc_message": "Upstream cluster unavailable"}'
+```
+
+---
+
+## 11. TLS Fault (`tls_fault`)
+
+Simulates SSL and TLS protocol failures, handshake stalls, and certificate validation errors at the socket record layer.
+
+### Attributes
+
+| Attribute | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `mode` | string | `alert_handshake_failure` | Fault mode: `alert_handshake_failure`, `alert_bad_certificate`, `alert_access_denied`, `stall_handshake`, `corrupt_handshake` |
+| `stall_seconds` | float | `30.0` | Freeze duration when using `stall_handshake` mode |
+
+### Example
+
+```bash
+faultbox toxic add https-proxy cert-error --type tls_fault --direction inbound --attributes '{"mode": "alert_bad_certificate"}'
+```
+
+
