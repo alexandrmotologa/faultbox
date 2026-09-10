@@ -1,0 +1,27 @@
+name: "cascading-failure"
+description: "Simulates an escalating failure starting with latency spikes and culminating in HTTP 503 errors"
+target_proxy: "http-service"
+phases:
+  - time_seconds: 0.0
+    action: "add_toxic"
+    toxic:
+      name: "moderate-latency"
+      type: "latency"
+      direction: "inbound"
+      attributes:
+        latency_ms: 200
+        jitter_ms: 50
+
+  - time_seconds: 5.0
+    action: "add_toxic"
+    toxic:
+      name: "upstream-503"
+      type: "http_error"
+      direction: "outbound"
+      attributes:
+        status_code: 503
+        status_message: "Service Unavailable"
+        body: '{"error": "Upstream service overloaded"}'
+
+  - time_seconds: 15.0
+    action: "reset"

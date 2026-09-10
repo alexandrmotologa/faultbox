@@ -1,0 +1,30 @@
+name: "slow-3g-mobile"
+description: "Simulates high latency and throttled bandwidth of a poor mobile connection"
+target_proxy: "app-proxy"
+phases:
+  - time_seconds: 0.0
+    action: "add_toxic"
+    toxic:
+      name: "mobile-latency"
+      type: "latency"
+      direction: "both"
+      attributes:
+        latency_ms: 350
+        jitter_ms: 100
+        distribution: "uniform"
+
+  - time_seconds: 5.0
+    action: "add_toxic"
+    toxic:
+      name: "bandwidth-limit"
+      type: "bandwidth"
+      direction: "inbound"
+      attributes:
+        rate_kbps: 40
+
+  - time_seconds: 15.0
+    action: "remove_toxic"
+    toxic_name: "bandwidth-limit"
+
+  - time_seconds: 20.0
+    action: "reset"

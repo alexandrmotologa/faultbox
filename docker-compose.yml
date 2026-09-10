@@ -1,0 +1,18 @@
+services:
+  upstream:
+    image: kennethreitz/httpbin
+    ports:
+      - "8080:80"
+
+  faultbox:
+    build: .
+    ports:
+      - "8474:8474"   # Control Plane REST API
+      - "9000:9000"   # Chaos Proxy Port (forwards to upstream:80)
+    environment:
+      - PYTHONUNBUFFERED=1
+    command: >
+      run --api --host 0.0.0.0 --api-port 8474
+      --proxy "http-service:9000->upstream:80"
+    depends_on:
+      - upstream

@@ -1,0 +1,17 @@
+name: "flapping-service"
+description: "Simulates an unstable microservice alternating between healthy and dropped connections"
+target_proxy: "app-proxy"
+phases:
+  - time_seconds: 0.0
+    action: "add_toxic"
+    toxic:
+      name: "flapping-link"
+      type: "flapping"
+      direction: "both"
+      attributes:
+        up_duration_sec: 4.0
+        down_duration_sec: 2.0
+        down_action: "reset"
+
+  - time_seconds: 15.0
+    action: "reset"

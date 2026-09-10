@@ -1,0 +1,21 @@
+name: "split-brain-packet-drop"
+description: "Simulates network partition and severe packet loss between cluster nodes"
+target_proxy: "cluster-node"
+phases:
+  - time_seconds: 0.0
+    action: "add_toxic"
+    toxic:
+      name: "packet-blackhole"
+      type: "timeout"
+      direction: "both"
+      attributes:
+        timeout_ms: 100
+
+  - time_seconds: 10.0
+    action: "pause"
+
+  - time_seconds: 20.0
+    action: "resume"
+
+  - time_seconds: 25.0
+    action: "reset"
