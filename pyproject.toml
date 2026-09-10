@@ -43,6 +43,9 @@ dev = [
 [project.scripts]
 faultbox = "faultbox.cli:app"
 
+[project.entry-points.pytest11]
+faultbox = "faultbox.pytest_plugin"
+
 [tool.hatch.build.targets.wheel]
 packages = ["src/faultbox"]
 
