@@ -167,3 +167,26 @@ Inspects HTTP response streams and substitutes the original status line and body
 ```bash
 faultbox toxic add my-proxy rate-limit --type http_error --direction outbound --attributes '{"status_code": 429, "status_message": "Too Many Requests", "body": "{\"error\":\"rate_limited\"}"}'
 ```
+
+---
+
+## 9. Waveform Latency (`waveform_latency`)
+
+Adds dynamic, time-varying latency following mathematical waveforms (sine, sawtooth, burst, brownian) to simulate traffic waves, memory pressure, and peak hour spikes.
+
+### Attributes
+
+| Attribute | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `base_latency_ms` | integer | `100` | Minimum baseline latency in milliseconds |
+| `amplitude_ms` | integer | `200` | Maximum latency deviation added on top of the base |
+| `period_sec` | float | `10.0` | Duration in seconds of a complete waveform cycle |
+| `waveform` | string | `sine` | Curve formula: `sine`, `sawtooth`, `burst`, or `brownian` |
+| `jitter_ms` | integer | `0` | Random variance added to the calculated curve |
+
+### Example
+
+```bash
+faultbox toxic add my-proxy rush-hour --type waveform_latency --attributes '{"base_latency_ms": 50, "amplitude_ms": 300, "period_sec": 30.0, "waveform": "sawtooth"}'
+```
+

@@ -13,9 +13,11 @@ from faultbox.toxics.latency import LatencyToxic
 from faultbox.toxics.reset_peer import ResetPeerToxic
 from faultbox.toxics.slicer import SlicerToxic
 from faultbox.toxics.timeout import TimeoutToxic
+from faultbox.toxics.waveform_latency import WaveformLatencyToxic
 
 TOXIC_REGISTRY: dict[str, type[BaseToxic]] = {
     "latency": LatencyToxic,
+    "waveform_latency": WaveformLatencyToxic,
     "bandwidth": BandwidthToxic,
     "reset_peer": ResetPeerToxic,
     "timeout": TimeoutToxic,

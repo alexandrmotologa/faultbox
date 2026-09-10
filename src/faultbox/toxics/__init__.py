@@ -10,6 +10,7 @@ from faultbox.toxics.latency import LatencyToxic
 from faultbox.toxics.reset_peer import ResetPeerToxic
 from faultbox.toxics.slicer import SlicerToxic
 from faultbox.toxics.timeout import TimeoutToxic
+from faultbox.toxics.waveform_latency import WaveformLatencyToxic
 
 __all__ = [
     "TOXIC_REGISTRY",
@@ -24,5 +25,6 @@ __all__ = [
     "StreamContext",
     "TimeoutToxic",
     "ToxicDirection",
+    "WaveformLatencyToxic",
     "create_toxic",
 ]
