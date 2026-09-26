@@ -62,9 +62,14 @@ Click **+ Toxic** on any proxy to open the toxic attachment modal:
   <img src="images/dashboard-modal-toxic.png" alt="FaultBox Interactive Toxic Injection Modal" width="750" />
 </p>
 
-### 5. Visual Design
+### 5. Visual Design & Multi-Device Responsiveness
 - Premium dark theme with Inter and JetBrains Mono typography.
 - Semantic color-coded toxic badges: yellow for latency, cyan for throughput, red for destructive errors, purple for corruption, orange for behavioral faults.
 - Toast notifications for all operations (replaces browser-native alerts).
 - Confirmation dialogs for destructive actions (delete proxy, reset toxics).
-- Full responsive layout: scrollable tables on mobile, touch-friendly action buttons, and collapsible modals with scroll support.
+- **Adaptive Single-Row Actions**: Action buttons stay strictly on a single horizontal row (`flex-wrap: nowrap`) with tooltips on hover. Below 1350px viewport width (laptops and tablets), labels seamlessly collapse into compact icon-only buttons (`+ Toxic`, `Pause/Resume`, `Reset`, `Delete`), preventing awkward line wrapping.
+- **Multi-Device Adaptability**: Fully responsive grid layout across mobile smartphones, tablets, laptops, and ultra-wide displays. KPI cards adapt smoothly (2-column balanced grid on mobile), table enables smooth touch scrolling with a customized scrollbar, and modals fit comfortably within any viewport height.
+
+<p align="center">
+  <img src="images/dashboard-mobile.png" alt="FaultBox Mobile Responsive Dashboard" width="380" />
+</p>

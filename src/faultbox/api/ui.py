@@ -335,10 +335,53 @@ def get_ui_html() -> str:
       border-radius: 50%;
     }
 
+    /* ── Table Action Buttons & Tooltips ── */
     .proxy-actions {
       display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
+      align-items: center;
+      gap: 5px;
+      flex-wrap: nowrap;
+      white-space: nowrap;
+    }
+    .proxy-actions .btn {
+      padding: 5px 9px;
+      font-size: 11px;
+      min-height: 30px;
+      flex-shrink: 0;
+      gap: 5px;
+    }
+    .proxy-actions .btn-label {
+      display: inline;
+    }
+
+    .has-tooltip {
+      position: relative;
+    }
+    .has-tooltip::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: calc(100% + 6px);
+      left: 50%;
+      transform: translateX(-50%) translateY(4px);
+      background: #0f172a;
+      color: #f1f5f9;
+      font-size: 11px;
+      font-weight: 500;
+      padding: 4px 8px;
+      border-radius: 4px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.15s ease, transform 0.15s ease;
+      z-index: 100;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    }
+    .has-tooltip:hover::after {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(0);
     }
 
     /* ── Modal ── */
@@ -473,29 +516,60 @@ def get_ui_html() -> str:
     @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
 
-    /* ── Responsive ── */
+    /* ── Responsive & Adaptive ── */
+    @media (max-width: 1350px) {
+      .proxy-actions .btn-label {
+        display: none;
+      }
+      .proxy-actions .btn {
+        padding: 6px 8px;
+        min-width: 32px;
+        min-height: 32px;
+        justify-content: center;
+      }
+    }
+    @media (max-width: 1024px) {
+      .app-shell { padding: 18px 20px 36px; }
+      .kpi-grid { grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
+      .kpi-card { padding: 16px; }
+      .kpi-value { font-size: 24px; }
+    }
     @media (max-width: 768px) {
-      .app-shell { padding: 16px; }
-      header { gap: 12px; }
-      .header-text h1 { font-size: 17px; }
-      .kpi-grid { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
+      .app-shell { padding: 14px 16px 32px; }
+      header { gap: 12px; margin-bottom: 20px; padding-bottom: 16px; }
+      .header-text h1 { font-size: 18px; }
+      .kpi-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px; }
+      .kpi-card:last-child { grid-column: span 2; }
       .kpi-card { padding: 14px; }
       .kpi-value { font-size: 22px; }
       .panel-header { padding: 12px 16px; }
-      th, td { padding: 10px 12px; }
-      .form-row { grid-template-columns: 1fr; }
-      .modal { padding: 18px; }
+      th, td { padding: 10px 12px; font-size: 12px; }
+      .form-row { grid-template-columns: 1fr; gap: 10px; }
+      .modal { padding: 20px; max-height: 85vh; width: 95%; max-width: 480px; }
       .proxy-actions { gap: 4px; }
+      .proxy-actions .btn { min-width: 30px; min-height: 30px; padding: 5px 6px; }
       .btn { padding: 6px 10px; font-size: 11px; }
+      input, select, textarea { font-size: 13px; padding: 9px 10px; }
     }
     @media (max-width: 480px) {
-      .header-brand { gap: 10px; }
-      .header-logo { width: 30px; height: 30px; }
-      .header-text h1 { font-size: 15px; }
-      .header-text .subtitle { display: none; }
-      .kpi-grid { grid-template-columns: 1fr 1fr; }
-      .toast-container { left: 16px; right: 16px; bottom: 16px; }
-      .toast { max-width: none; }
+      .app-shell { padding: 12px 12px 24px; }
+      header { flex-direction: column; align-items: stretch; gap: 12px; }
+      .header-brand { justify-content: flex-start; }
+      .header-actions { justify-content: space-between; width: 100%; }
+      .header-actions .btn { flex: 1; justify-content: center; }
+      .header-logo { width: 32px; height: 32px; }
+      .header-text h1 { font-size: 16px; }
+      .header-text .subtitle { font-size: 11px; }
+      .kpi-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+      .kpi-card { padding: 12px; }
+      .kpi-title { font-size: 10px; }
+      .kpi-value { font-size: 20px; }
+      .toast-container { left: 12px; right: 12px; bottom: 16px; }
+      .toast { max-width: none; font-size: 12px; padding: 10px 14px; }
+      .modal { padding: 16px; margin: 8px; width: calc(100% - 16px); }
+      .modal-title { font-size: 15px; margin-bottom: 14px; }
+      .modal-actions { flex-direction: column-reverse; gap: 8px; }
+      .modal-actions .btn { width: 100%; min-height: 38px; }
     }
   </style>
 </head>
@@ -558,13 +632,13 @@ def get_ui_html() -> str:
         <table>
           <thead>
             <tr>
-              <th>Name</th>
-              <th>Listen</th>
-              <th>Upstream</th>
-              <th>State</th>
-              <th>Active Toxics</th>
-              <th>Transferred</th>
-              <th>Actions</th>
+              <th style="min-width: 120px;">Name</th>
+              <th style="min-width: 130px;">Listen</th>
+              <th style="min-width: 130px;">Upstream</th>
+              <th style="min-width: 85px;">State</th>
+              <th style="min-width: 220px;">Active Toxics</th>
+              <th style="min-width: 150px;">Transferred</th>
+              <th style="min-width: 145px; text-align: right;">Actions</th>
             </tr>
           </thead>
           <tbody id="proxy-table-body">
@@ -964,6 +1038,10 @@ def get_ui_html() -> str:
             ? '<svg width="12" height="12" fill="currentColor" viewBox="0 0 16 16"><rect x="3" y="2" width="3.5" height="12" rx="1"/><rect x="9.5" y="2" width="3.5" height="12" rx="1"/></svg>'
             : '<svg width="12" height="12" fill="currentColor" viewBox="0 0 16 16"><path d="M4 2l10 6-10 6V2z"/></svg>';
 
+          const addIcon = '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 16 16"><path d="M8 2v12M2 8h12" stroke-linecap="round"/></svg>';
+          const resetIcon = '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 16 16"><path d="M2.5 8a5.5 5.5 0 101.6-3.9L2 6.5M2 2.5v4h4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+          const deleteIcon = '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 16 16"><path d="M2.5 4.5h11M5.5 4.5V3a1.5 1.5 0 011.5-1.5h2A1.5 1.5 0 0110.5 3v1.5m2 0v9a1.5 1.5 0 01-1.5 1.5h-6A1.5 1.5 0 013.5 13.5v-9" stroke-linecap="round"/></svg>';
+
           return '<tr>'
             + '<td style="font-weight:600;color:var(--text-bright)">' + p.name + '</td>'
             + '<td><code>' + p.listen + '</code></td>'
@@ -971,12 +1049,18 @@ def get_ui_html() -> str:
             + '<td>' + statusBadge + '</td>'
             + '<td>' + toxicsHtml + '</td>'
             + '<td style="font-size:12px;font-family:var(--mono);white-space:nowrap">' + bytesIn + ' ↓ / ' + bytesOut + ' ↑</td>'
-            + '<td><div class="proxy-actions">'
-              + '<button class="btn btn-sm" onclick="openAddToxicModal(\\'' + p.name + '\\')" title="Add Toxic">+ Toxic</button>'
-              + '<button class="btn btn-sm btn-icon" onclick="' + toggleFn + '(\\'' + p.name + '\\')" title="' + toggleLabel + '">' + toggleIcon + '</button>'
-              + '<button class="btn btn-sm" onclick="resetProxy(\\'' + p.name + '\\')" title="Reset">Reset</button>'
-              + '<button class="btn btn-sm btn-icon btn-danger" onclick="deleteProxy(\\'' + p.name + '\\')" title="Delete">'
-              + '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 16 16"><path d="M2 4h12M5 4V2.5A1.5 1.5 0 016.5 1h3A1.5 1.5 0 0111 2.5V4m1 0v9a1.5 1.5 0 01-1.5 1.5h-5A1.5 1.5 0 014 13V4" stroke-linecap="round"/></svg>'
+            + '<td style="text-align: right;"><div class="proxy-actions" style="justify-content: flex-end;">'
+              + '<button class="btn btn-sm btn-icon-adaptive has-tooltip" onclick="openAddToxicModal(\\'' + p.name + '\\')" title="Attach Toxic" data-tooltip="Attach Toxic">'
+                + addIcon + '<span class="btn-label">Toxic</span>'
+              + '</button>'
+              + '<button class="btn btn-sm btn-icon-adaptive has-tooltip" onclick="' + toggleFn + '(\\'' + p.name + '\\')" title="' + toggleLabel + ' Proxy" data-tooltip="' + toggleLabel + '">'
+                + toggleIcon + '<span class="btn-label">' + toggleLabel + '</span>'
+              + '</button>'
+              + '<button class="btn btn-sm btn-icon-adaptive has-tooltip" onclick="resetProxy(\\'' + p.name + '\\')" title="Reset Toxics" data-tooltip="Reset">'
+                + resetIcon + '<span class="btn-label">Reset</span>'
+              + '</button>'
+              + '<button class="btn btn-sm btn-icon-adaptive btn-danger has-tooltip" onclick="deleteProxy(\\'' + p.name + '\\')" title="Delete Proxy" data-tooltip="Delete">'
+                + deleteIcon + '<span class="btn-label">Delete</span>'
               + '</button>'
             + '</div></td>'
           + '</tr>';
