@@ -44,7 +44,7 @@ FaultBox runs as a standalone process or Docker container. You point your applic
   - TLS Fault: simulates SSL handshake failures, bad certificates, and TLS alert records.
 - Python Client SDK & Pytest Plugin: programmatic chaos injection with scoped context managers (`with client.toxic(...)`).
 - REST control plane: manage proxies, toxics, and metrics at runtime via HTTP endpoints.
-- Web UI Dashboard: single-page browser interface with live WebSocket telemetry at `http://127.0.0.1:8474/`.
+- Web UI Dashboard: single-page browser interface with live WebSocket telemetry, sparkline charts, dynamic toxic configuration forms, and full mobile responsiveness at `http://127.0.0.1:8474/`.
 - Terminal dashboard: live terminal interface using Rich to observe traffic and toggle toxics.
 - Prometheus Metrics: native `/metrics` endpoint for Prometheus and Grafana monitoring.
 - Declarative scenarios: automate timed chaos experiments using YAML scenario files in CI/CD pipelines.
