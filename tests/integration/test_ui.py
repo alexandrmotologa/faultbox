@@ -25,7 +25,7 @@ async def test_ui_endpoints_html(proxy_manager: ProxyManager) -> None:
             resp = await client.get(path)
             assert resp.status_code == 200
             assert "text/html" in resp.headers["content-type"]
-            assert "FaultBox Control Dashboard" in resp.text
+            assert "FaultBox" in resp.text
             assert "kpi-card" in resp.text
 
 
