@@ -65,3 +65,59 @@ class MessageResponse(BaseModel):
 
     status: str
     message: str
+
+
+class ScenarioRunRequest(BaseModel):
+    """Payload to execute a YAML chaos scenario."""
+
+    yaml_content: str = Field(..., description="YAML scenario definition text")
+
+
+class ScenarioEventResponse(BaseModel):
+    """Individual executed scenario event."""
+
+    timestamp: float
+    time_offset: float
+    action: str
+    target_proxy: str
+    success: bool
+    message: str
+
+
+class ScenarioAssertionResponse(BaseModel):
+    """Quality gate assertion evaluation result."""
+
+    metric: str
+    operator: str
+    threshold: float
+    actual_value: float
+    passed: bool
+    target_proxy: str | None = None
+    description: str = ""
+    message: str = ""
+
+
+class ScenarioRunResponse(BaseModel):
+    """Report of executed scenario."""
+
+    name: str
+    total_phases: int
+    executed_phases: int
+    duration_seconds: float
+    events: list[ScenarioEventResponse]
+    assertions: list[ScenarioAssertionResponse]
+    assertions_passed: bool
+    success: bool
+
+
+class TopologyExportResponse(BaseModel):
+    """Full cluster topology snapshot."""
+
+    version: str = "1.0"
+    proxies: list[dict[str, Any]]
+
+
+class TopologyImportRequest(BaseModel):
+    """Payload to restore a cluster topology."""
+
+    proxies: list[dict[str, Any]]

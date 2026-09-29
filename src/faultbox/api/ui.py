@@ -48,7 +48,6 @@ def get_ui_html() -> str:
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
-
     html { scroll-behavior: smooth; }
 
     body {
@@ -63,7 +62,7 @@ def get_ui_html() -> str:
     }
 
     .app-shell {
-      max-width: 1320px;
+      max-width: 1360px;
       margin: 0 auto;
       padding: 20px 24px 40px;
     }
@@ -126,6 +125,8 @@ def get_ui_html() -> str:
     .badge-green { background: var(--green-dim); color: var(--green); border: 1px solid rgba(34,197,94,0.25); }
     .badge-red { background: var(--red-dim); color: var(--red); border: 1px solid rgba(239,68,68,0.25); }
     .badge-yellow { background: var(--yellow-dim); color: var(--yellow); border: 1px solid rgba(234,179,8,0.25); }
+    .badge-cyan { background: var(--cyan-dim); color: var(--cyan); border: 1px solid rgba(6,182,212,0.25); }
+    .badge-purple { background: var(--purple-dim); color: var(--purple); border: 1px solid rgba(168,85,247,0.25); }
     .badge::before {
       content: '';
       width: 6px;
@@ -178,6 +179,70 @@ def get_ui_html() -> str:
       font-variant-numeric: tabular-nums;
     }
 
+    /* ── Toolbar & Filter Bar ── */
+    .filter-bar {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .filter-search-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+      min-width: 240px;
+      position: relative;
+    }
+    .filter-search-box svg {
+      position: absolute;
+      left: 10px;
+      color: var(--text-muted);
+    }
+    .filter-search-input {
+      padding-left: 32px !important;
+      font-size: 13px;
+      background: var(--bg) !important;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-bright);
+      width: 100%;
+    }
+    .filter-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .filter-chip {
+      background: var(--bg-raised);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 4px 10px;
+      border-radius: 14px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.15s ease;
+    }
+    .filter-chip:hover {
+      color: var(--text-bright);
+      border-color: #334155;
+    }
+    .filter-chip.active {
+      background: rgba(59, 130, 246, 0.15);
+      border-color: var(--accent);
+      color: #93c5fd;
+      font-weight: 600;
+    }
+
     /* ── Panel ── */
     .panel {
       background: var(--card-bg);
@@ -201,6 +266,9 @@ def get_ui_html() -> str:
       font-weight: 600;
       font-size: 15px;
       color: var(--text-bright);
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
     /* ── Table ── */
@@ -252,7 +320,7 @@ def get_ui_html() -> str:
       transition: all 0.15s ease;
       min-height: 34px;
     }
-    .btn:hover { background: #1e2a3a; border-color: #2a3a4e; }
+    .btn:hover { background: #1e2a3a; border-color: #2a3a4e; color: var(--text-bright); }
     .btn:active { transform: scale(0.97); }
     .btn-primary {
       background: var(--accent);
@@ -260,13 +328,25 @@ def get_ui_html() -> str:
       border-color: transparent;
       font-weight: 600;
     }
-    .btn-primary:hover { background: var(--accent-hover); }
+    .btn-primary:hover { background: var(--accent-hover); color: #fff; }
+    .btn-scenario {
+      background: linear-gradient(135deg, #8b5cf6, #ec4899);
+      color: #fff;
+      border-color: transparent;
+      font-weight: 600;
+      box-shadow: 0 2px 8px rgba(236, 72, 153, 0.25);
+    }
+    .btn-scenario:hover {
+      background: linear-gradient(135deg, #7c3aed, #db2777);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(236, 72, 153, 0.4);
+    }
     .btn-danger {
       background: var(--red-dim);
       color: var(--red);
       border-color: rgba(239,68,68,0.2);
     }
-    .btn-danger:hover { background: rgba(239,68,68,0.2); border-color: rgba(239,68,68,0.4); }
+    .btn-danger:hover { background: rgba(239,68,68,0.2); border-color: rgba(239,68,68,0.4); color: #fca5a5; }
     .btn-icon {
       padding: 7px 9px;
       min-width: 34px;
@@ -287,31 +367,16 @@ def get_ui_html() -> str:
       white-space: nowrap;
       transition: all 0.15s ease;
     }
-    /* Latency / Delay category */
-    .toxic-latency { background: var(--yellow-dim); border: 1px solid rgba(234,179,8,0.25); color: var(--yellow); }
-    .toxic-waveform_latency { background: var(--yellow-dim); border: 1px solid rgba(234,179,8,0.25); color: var(--yellow); }
-    /* Throughput / Throttle category */
+    .toxic-latency, .toxic-waveform_latency { background: var(--yellow-dim); border: 1px solid rgba(234,179,8,0.25); color: var(--yellow); }
     .toxic-bandwidth { background: var(--cyan-dim); border: 1px solid rgba(6,182,212,0.25); color: var(--cyan); }
-    .toxic-timeout { background: var(--orange-dim); border: 1px solid rgba(249,115,22,0.25); color: var(--orange); }
-    /* Destructive / Error category */
-    .toxic-reset_peer { background: var(--red-dim); border: 1px solid rgba(239,68,68,0.25); color: var(--red); }
-    .toxic-http_error { background: var(--red-dim); border: 1px solid rgba(239,68,68,0.25); color: var(--red); }
-    .toxic-grpc_fault { background: var(--red-dim); border: 1px solid rgba(239,68,68,0.25); color: var(--red); }
-    /* Corruption / Manipulation category */
-    .toxic-corrupt { background: var(--purple-dim); border: 1px solid rgba(168,85,247,0.25); color: var(--purple); }
-    .toxic-slicer { background: var(--purple-dim); border: 1px solid rgba(168,85,247,0.25); color: var(--purple); }
-    .toxic-tls_fault { background: var(--purple-dim); border: 1px solid rgba(168,85,247,0.25); color: var(--purple); }
-    /* Database category */
+    .toxic-timeout, .toxic-flapping { background: var(--orange-dim); border: 1px solid rgba(249,115,22,0.25); color: var(--orange); }
+    .toxic-reset_peer, .toxic-http_error, .toxic-grpc_fault, .toxic-packet_drop { background: var(--red-dim); border: 1px solid rgba(239,68,68,0.25); color: var(--red); }
+    .toxic-corrupt, .toxic-slicer, .toxic-tls_fault { background: var(--purple-dim); border: 1px solid rgba(168,85,247,0.25); color: var(--purple); }
     .toxic-postgres_fault { background: rgba(59, 130, 246, 0.12); border: 1px solid rgba(59, 130, 246, 0.3); color: #60a5fa; }
     .toxic-redis_fault { background: var(--red-dim); border: 1px solid rgba(239, 68, 68, 0.3); color: #f87171; }
-    /* UDP & Datagram category */
-    .toxic-packet_drop { background: var(--red-dim); border: 1px solid rgba(239, 68, 68, 0.3); color: #f87171; }
     .toxic-packet_duplicate { background: var(--cyan-dim); border: 1px solid rgba(6, 182, 212, 0.3); color: #22d3ee; }
     .toxic-packet_reorder { background: var(--yellow-dim); border: 1px solid rgba(234, 179, 8, 0.3); color: #fde047; }
-    /* Observability & Tracing category */
     .toxic-trace_inject { background: rgba(14, 165, 233, 0.12); border: 1px solid rgba(14, 165, 233, 0.3); color: #38bdf8; }
-    /* Behavioral category */
-    .toxic-flapping { background: var(--orange-dim); border: 1px solid rgba(249,115,22,0.25); color: var(--orange); }
 
     .toxic-delete {
       cursor: pointer;
@@ -359,13 +424,9 @@ def get_ui_html() -> str:
       flex-shrink: 0;
       gap: 5px;
     }
-    .proxy-actions .btn-label {
-      display: inline;
-    }
+    .proxy-actions .btn-label { display: inline; }
 
-    .has-tooltip {
-      position: relative;
-    }
+    .has-tooltip { position: relative; }
     .has-tooltip::after {
       content: attr(data-tooltip);
       position: absolute;
@@ -397,7 +458,7 @@ def get_ui_html() -> str:
     .modal-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.7);
+      background: rgba(0, 0, 0, 0.75);
       backdrop-filter: blur(4px);
       display: none;
       align-items: center;
@@ -412,12 +473,15 @@ def get_ui_html() -> str:
       border: 1px solid var(--border);
       border-radius: var(--radius);
       width: 100%;
-      max-width: 520px;
+      max-width: 540px;
       max-height: 90vh;
       overflow-y: auto;
       padding: 24px;
       box-shadow: 0 8px 32px rgba(0,0,0,0.5);
       animation: slideUp 0.2s ease;
+    }
+    .modal-lg {
+      max-width: 760px;
     }
     .modal-title {
       font-size: 17px;
@@ -426,6 +490,9 @@ def get_ui_html() -> str:
       margin-bottom: 20px;
       padding-bottom: 14px;
       border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
     .form-group { margin-bottom: 16px; }
     .form-group label {
@@ -473,6 +540,63 @@ def get_ui_html() -> str:
       padding-top: 16px;
       border-top: 1px solid var(--border);
     }
+
+    /* ── Scenario Timeline & Assertions UI ── */
+    .timeline-container {
+      margin-top: 20px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 16px;
+    }
+    .timeline-header {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-bright);
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .timeline-events {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 220px;
+      overflow-y: auto;
+    }
+    .timeline-event-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 12px;
+      padding: 6px 10px;
+      background: var(--bg-raised);
+      border-radius: 4px;
+      border-left: 3px solid var(--accent);
+    }
+    .timeline-event-item.success { border-left-color: var(--green); }
+    .timeline-event-item.fail { border-left-color: var(--red); }
+    .timeline-time {
+      font-family: var(--mono);
+      color: var(--text-muted);
+      font-size: 11px;
+      min-width: 50px;
+    }
+
+    .assertion-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 12px;
+      background: var(--bg-raised);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      margin-bottom: 6px;
+      font-size: 12px;
+    }
+    .assertion-card.pass { border-left: 3px solid var(--green); }
+    .assertion-card.fail { border-left: 3px solid var(--red); }
 
     /* ── Confirm Dialog ── */
     .confirm-dialog .modal { max-width: 400px; text-align: center; }
@@ -523,19 +647,11 @@ def get_ui_html() -> str:
     @keyframes slideUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes slideInRight { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }
     @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
-    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
 
     /* ── Responsive & Adaptive ── */
     @media (max-width: 1350px) {
-      .proxy-actions .btn-label {
-        display: none;
-      }
-      .proxy-actions .btn {
-        padding: 6px 8px;
-        min-width: 32px;
-        min-height: 32px;
-        justify-content: center;
-      }
+      .proxy-actions .btn-label { display: none; }
+      .proxy-actions .btn { padding: 6px 8px; min-width: 32px; min-height: 32px; justify-content: center; }
     }
     @media (max-width: 1024px) {
       .app-shell { padding: 18px 20px 36px; }
@@ -551,6 +667,7 @@ def get_ui_html() -> str:
       .kpi-card:last-child { grid-column: span 2; }
       .kpi-card { padding: 14px; }
       .kpi-value { font-size: 22px; }
+      .filter-bar { flex-direction: column; align-items: stretch; }
       .panel-header { padding: 12px 16px; }
       th, td { padding: 10px 12px; font-size: 12px; }
       .form-row { grid-template-columns: 1fr; gap: 10px; }
@@ -586,14 +703,26 @@ def get_ui_html() -> str:
   <div class="app-shell">
     <header>
       <div class="header-brand">
-        <img class="header-logo" src="data:image/png;base64,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" alt="FaultBox Logo" style="border-radius: 10px;">
+        <img class="header-logo" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAYAAACOEfKtAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAB5JSURBVHhe3Vx3tCVFnb7hpRs63/veRIJDcBxAECWD5CGowKIIiouLC6uOqCzhrLCwKyIiKCZgXQYJKkEFkYVFgoAEYUaSzIwDA4zg5PcmAcOkl749X4Xu6uq+772Z5fiH95zfufdWV1d3ff2rX64uFLb8U6zVat1BEEzzff/AoNk8qtFoHB1sJbU6V7fze6Q+ecft/zalzmk2p9eDYP8wDKc6E5zInuy79iFgnu9d7njuPMd1h13fgxf4GXL9hDxBQaZPQuljrkHZvunzXEXpccxvTWo83q++J/Oa4l49TQOu7z/n+v7FrutOsTHYqo/jODu6nvtTz/cG9AVrjodK1UGl6hrkoKvqGqSPe6jUXFRq+ts8h+PI3/qchMx+6jxzDD2Oaq9mjvO3B8cjuXA9V3zr365Pkufpa9bqbgyw47nrvcC7OoqiCTYmY/64vjuj7jpv82KdFQeFgotiyUcQRhg/sYEJk0KMF8T/ivh/oiJ1XPebwH4WmWPEv/X5E9kmx+QxTfYYKRLXjTB+coRtt48QNQM4rgTRJHJkte6h0RNhwuQI3eMiOK4v5lgoEEwfQRQQ7BU11/2Ujc1on3Ldd2/0wwA1h4M6GD/RxxkzGrjl1yFmzfcwd0mAecs8zF3qYu4SD3MXe5i3xKClPCa/2W/eUhfzlpDUb3VMnMsxRJv81r/ZP2l3kjH0cX1MjKvO5fcSFwt7HTz+7Hg0e0LBZTaAHV0etpsS4I/zm3h5hYs5fw3wxIserrslwKmnN9EzPhLzrtYdAbbr+1fYILX6lOtu/W4v8NDW4aLuhfi3i7rx0lIXm9CBjSjhTRSwBgWsRjEm/k+I/9leMo4nfVZbZLabx/P6m9exxzHPBwr45lXy4XOpSuAIhFy+5LTvXBMBKGKtOo/z2oQi+tGJPy30cNqZDZTbPHRVPASNgOfNtMHKfFzPvckPfRSKDiZtG+DBJ3mRDnGBZYMlLB8st6aBEpYPmG1txm+ey+PqmzSkaLAoaUB9mySOm2OYfa2x1PGVwwUs31DF1F18tLU7cAgggePSDTyUyi523zNA38Ya+obUOPweKmIZaUCCSiBvu7tbLPP2Dhd+KGTqZTZm8afu1r/ITu2dPrafEuHZ+QE2Q99sGcuHckDbEhLgJRNfIdpVG68xUMQK8RCKeAcFrEWxxUNLwEq38fwiNqGAX9wbolBUSkMAqDWtL+T4rfcE2IASlulzFYCSCUpY3l/CioEChlDGQ081xXmdXQ7IXH7kH2djV/A8b/u662ygBqvWAzw8u4EBTqBfcZWmzGTGSOJ8zYFFrBgsCLBWDJTVt5w8wVuHMn7zSICn/lzHGnJWy+vyPD0GqYjeQQLYhRNOaqjlqzSuR7PLQ6Hg4fhPNLERFawQ3JcezwRweX9ZcOMgSph5WwOlMh8Al7K3wvO8IAWg4zm3yAs4+Mr5EYbQISekATQuxJu12zI0YC7fNIAc922U0cf2zXrysp1yaP4SD51dAc78UoR+tGOZeS3jNzlYnNtP0uMW8MwrNLcCVOvaXJGcSGVSqwd4al6Ad7iy7HuOryFXQQzmAJdzBZ86rUfITmnmeJcn4DnOzq7vDdL2GjchEApjDeVILnhtirIXXjHYpiYl+6TO1RMdoBJqw/W3NjF/WRUrh9Jc2I82XHAJuaeOqdMCLN9Qx8rh7GRj8NS4vf28RhEDaMd5F1ODyqWriZqUY54xI8IAOizZapG4byUmBkpYNlASIuXxFwJUKp6wF13Pe6s+rt6UALrut/1A2kCfOZ1PvSNhYwVCskwkQJmLCiKAEtwMwIprV6GIRW/XMXnbBn77pI+3UFTAltE3XMSaoSr2OSBEsSTtzp/9mqIkf7Kpe+ovYdVwQYw9ZacQHZ0mgL7QpN09PuYucoVFIMfIGZdjqQcU99GrY7iCgw+PUCpRFgaUh2cRv1Ldc1/mhYpFH9ffGmETb9jSqHrZ5oIjSIEqbkByYqbPQBlvo4hHngmELLrosgib0YbewTJ6B8rC3HlpmYPxkwJhuLe1e/jQvt1Y0+9gVQ4XxtdTHLxZyKpQiCFpsmjuI3N4uPSqhrgeOSozjiIxVgrAspKHJcHd/3E5V4cnAHQD7/eFer3edDx3uO6QNQM89ryHdULz5gysBk/a2wzN3IorDRooYwPKuPFXtMPq2HOfCG8NO3KJDpQEuE+8SFeRJGUNb/brVzbFzbeaOO+rd4jLrIIjj4lQLNZj7culywex+54NrNxUx8qRZN+QBk+LIrVy1AqhDXzbvSHKbdKldTx3XaEWBLtQyFL7NnsiPL8wEDYQB5Qq3rhR+8lkzBoDxKE8JcKbKOPGX0hDtlT28bO7GoLjqe354O7/g4OOTg91V/mqdT5YHw8/E2IDrQL7wSpaRxn1YoBKzRfKI/F/peb9+d0UTSUsM+85ZyXp8WIAhWwlqft7uoGuahhzeMH3/YP4g475uAkR5izyhSXf6iJ8OrGGzQCYR8nSJombeJJL1BeyZNfdQ6EoegcLQjPe9WAgnjABFD5r4Aqj/gN7RVi1kUuZBr0xPuXTUElo6xnnSNMlDhoIxeHi0Okh3kYFvbYYsAHUHJiSrfIalIW894f+GKGrFqDuymhUodkcd5QAsOZi3MQIcxb7Ushq9tVkA9NSkSSU4laOsZkauIg/ve4LJ58REC7l71xLuVtGP4q44XapQU2/VQNx7kVNDKI9bUAP0F0s4PW1LrbZnsrDUdEWT0SNKJp+94wvzJvEKFff8bzyV0ss75Xtygf80KwIXVUJIOVgYdy4ccdQyEoTxgRQmSGtAIwvOgqQ+lwliIWiWO6IqAoBLLfXsfP7Qix/xwFQxnkXSSeehm8MoMdlTJ80wMPPcikbCm6gLMC/+idp4HkOx/niV8cDqAozhCBIOaop537NezaA1Ev4wVkhuipSRgsAG+PGHR1zoFjCQcKBxiCZi4yF9LlcBpslgDRbHpwVCEO5rV3KQtKPf+Zj/bCDqbs00Nml3C8du6MXobjwkCObeGuwihXKvOgdovFcxQEHU3kYy5eGc93FtF0jfPXcJh54MsCqoSo2oyxk/IqhQrJCzDmaTGORAPBpCWA9A2AsAw0ATTIvZgOVAU1xL12hzaRSDCDNiHMupKlRFw79589q4JqZTbyyuIlvXiVlGD2i2IbT5gi/PamVf35XiPWgL13ERhRw10M0i1x0dKSXPcfpqkiNz4e1/0EhfvDjJhYs9bARHQIQKi+hmGJOM5duev4SwKgFBxpKJAWgDZoNqEWpC2+WnEcABYiDJbH87n24IRz0OQu78djsHvzklm6cOYMOO1eC9l8NENV/wYVFB0ccE+EddImoy1tDtCsdnPTpCJMmS4BJ1ZoE3XEdQfQeSmXKXA/jJoT4xKci/PqBAKuF4a9EQh4ZcxZKZFaIShZAXwA43uRArb63BED74sqb4VNehQI2ox1/Wenh57/qxidPDTFxsoOimJSOAiu/NQNgQuzjhyGeWygVw+JNjDcWBEe90lfHT+9o4KRTmwIkjknuow+ccLRMBbB9xrkNbES7BJDz1Z6XOXcLwNYykABSC2sOJPeIaIQN1AhKIwMg20vCAH1jtYNzL4gwcbL0Qggal5c2VwRZHNeKCgUf/3VzKMZd1q/jhjIoylDWO+jAvMUOrrkxxHEnNjB+IiMowvAVYzMazXDda6uUhyNAkw86lzkUh5oAZmSg0MImgOKJ5AHYgkzQxM1I8IbQhkdmNbDTVGrJOjo6Ey8hASsNmNairY7zAZx1LgFU3KNjedSyKuBKjmd0eRCdeHpuD3omUHbJ4CrP//7MhghcCJtSr5bMw0+TAHC2NmMyHMi8R4g5iwNhamRA0QPmGc/mcQUgIyM0bm+5qxt1N0CxpJZnhttakc2FyX8uzU+f3o2N6BKKJAZQgWgSbcurbwxRKjE94aHU5uD9HwixcnN+lCc1pzyAaQeSA7MAqiVsGtI2OIJM/zcHZNGXnkGbiKS0dXho75B5iYSrxkoKtNR5Ul5+9ozuJNUQLz1p8GoupJJZ/E4NO7+PJpO8B3LfzXeGwna0AcrOI0301QkgvagcGehgHDlwiQIwF7wWpPspp5th8N8+3hB53/aOesx5LQHSJEwVO4drnyPl5wWXBPjza5RjdeHd0FxKDGQZ3WYk+ZqbpGHOsRjiP+yohrAbGXzInYfdFhMj5VIGEkApA8MRONAExr6IblO/taVOTliPMp54jnnWAG1tRkjdBisGTJonuk0u78SANvvxtwxNubjpl02cfFqEvfePsHydI7hDig6p+VcOFbB2sI4P7dNAuSzTk21tHu57MpK5EHterUjPT/nC2g6MXTnTE5EA5hjSOYNmqYQ1w0X8aaGLSdsyICqT1xnQLADTfdLcJyIeBleS6q6PsOHhl7+ZhG22k+bI4Ud3Y+V6D2/RXesnN9LALuLmO8h9cmxy4YknR1Ju6jxL3tzySPWNtXC+EtlKAPlf2VAMaF53i8zFjgpeC0rAs5ew/N/e6WC/A5r41/O3Q6FQg+MSRA/HHNeNJWtqWDVUEJGdVf0V7LVfIIxnxhddP8TT8wPhSsbRnLy55ZEBoDCkzWCCNqRpbKYAtAfJGTC+AZV8kQFRgmAmdLIgtaaEA2NOtPp0VurYd//JIiXAaAvbuHo6On3MXuCKuGA/CrjtHtqbSvYVXHzpXAZlO0aNB2bImGdrAANfFOLkAmiHrQzwtEMvaLN07NehCwceJnMaWnGkfNvRyFYiyoUzOZrj0eXjtygCKDg45bMR1qMdK4XHU8H0Y5siMs1cLnMh85e5Is88KnAtAsEawAdncwnnmTE6Hqi0cH5COyGdkO4bLoibpibkEt4IajqZeIkVgg2SSRlwdf/Wysf0XsgJdSfEYy/4IsrCsNX/Ps5KgkBFo11ceKnMvdD8ig1n9W1H3dPzSzNMDGC+GSOX8NwYwOygJjG6y/zGm6hg0VsOHnsuwLd/GOKgw0Lhr8ZlZTkA5Le1omxfU0YSoJP/kcuzU7hzb6MTx3xM+sF02Xae1hD3J/MuckXFGtgUQzZ4BnC6fWQAtQwcgx3YN1hE36Yqvn5FhH0PDLHDThHqjgwpFYo1OB5dpqz8GomrROSkJeDZfpL7XBGmeuApX/jAG1DAg7N8tLcziS6DFNfcxLSoctmUe5rkOaw52m2p4zqg2iqcFSuRnJB+DJ40VJkYuuz7fMrSjGAYnYZlIrskgHlGcC4pc0XLvNFI9GMVRdHB4Ucz3yFDW8PowKc/2xT3VG6vYbc9QqwZqqOP5g3nkQecOUe7LdWuciJjBjDFdWYuQfq4Z8ywS8cS7ZkCZhSOSs5TCiSnT4piDvRE8umO+2WZBkNbs+ezmDKQ1apVR9iLjz4bYL3O5tmkwbFWWKatJYB+YsZoALUMzAwaA0h7r4xrbmQI3ZyYCWLOxPPIWI5j5T5NDA4cfERD5IJZqMTIzGlnqHyKL414hvj3PSjC6n5dxpYDYExGYYB9jP/7tS/cQgYywWNq4Sx4GkAmcUoicFkqJS4WKcOBo5EBngZwrAY4xcdP7whEBZksKHLhunIlmWMS0Mt/IOWguP+WAI7WrjmwJYA5SiRDtPU4UAVHHitDROakhNLYSgAF14gi9px+lhgot7vY44MhejdWhBk1jDacdZ4sSBLKyxi3s8KCgQDzFnvC1MrOyQLKbtPthieSC6DIiSgAGQ9sZcbwJp55lcYsvQ17oha1BESS1NKjAW6PIfMeV9/AkFRRVJH9eYkrghdkAhM8zdXkws/NYAB1hKqsVuAZJABUZgyVZmADaHJgFsBk+c68VcbVmM/orMgMfXbiklSBdqY9powhbZ0f0HBO/rd3eJi2W4S+DTWheRnXO/sCLftyfGmVYK/UAvz+hUCAkJ2bJmXukHKWc8oOzHgiBoBxRDoFniQGSllJwOVy7PERpu4qS2m3yF1LUWtw+WAYhpq0bRNhg56FlGlX/CDEEGQx5oLeOsZNlOW3KeD4rWxRWTjq4iMnNrBeVKa24EIbvAyApRjATE7E5sA88KQNWMK1N8lKgecXTMK8hRNx6BGSA7YcxJHAY1WVg/fs2MSh098jfF/W/E3axsdrfTWsHmYlfglfvyJdD6PB0wa75kJyMc2eex5TlQ02aHkAWu1mQDUrA/M8kRyiDHz0BRe77DYe04/dDnvv5+KFl7fBR09IkuJj1aStiJxXanMxYbKH8y+cgp5x8oExG3fRpazxK4uA6RtrHGy3Q4SOLhs8YzytoJTmPvpjigt1PsQEyuS8lgDSDgxyOHBEQzqhFcMlvDlUwyFH9ogEM2Nyu+3hY97CbTD9GOmdjCQTRyP60RQPu+0e4jf374S992NgoipSoBMnR/jLSkZVKPtK+MZ3FecLoLJjSUrsUnIhawXvFVyYk/exy5JNGrW0Y0wcqA3pNlz1YykHeS6/9znAx4Il78G+ByhOzEykBanCIU5MVBTUPXzp7ADPvrQNjvpIdzwWr/Hl81j83iYSSYvX1TBlp8BKWI2s0WVlg4vpH5VcyPCbmJPt4mXmbQDYKi8ceyKjcCCJF161qYoTTmLVuiOixOS8Ez7ZjYUrtsV7p6mo9AgykTXZ3LzC8/h77/1DXPadJl5d1I3Hn+nB1F15rCbGYESZfZ5ZIIvfh1DCj27gg2qxbEcguoDFkofb76NZIwvIMzlhe86ifbTqLCuclRnEIPqV7NO7uYZvXBlh+x0jFIpSxvzzFxuY98ZE7PBemfyR20rTk+B/uoGHHBHhf+4LMG+Rh7XDIea82sCXz2kK06hY1gl4GbI/Y0a3KA1hVdXy9TXs9oFIpiq3ADxprEtuf99uDSxd58hqXJ2MagGgWd6mDelsQNXIymlDurW9JI/1QVYevLIsFDJRRmeqOPVzEV5YMAH7HsjIiCr0MSbCrVaOF+K5V3yA+eM7esS2LCa9ybk6VE9uYWqAJb6zXuLOIkabSyJRLjWvBVC8B9gGLgFQg8h7Pf0LTbGdSyTnzei6nqcGVFWpxnYgI9JpDpQFN6YdSNY2AWwFJnMMTNSsHKyJAMM/nBLg0KNCPPligDWbXJz5laYqS5OcRE3KWpXb75Ulan3DJby6rI7zLu5Guc1BpSbdMc1ZBOqEk9lXJtHf7K/g/Xty+dYEF9jc3ZrM6LiMZIsSj+sbgglSxZfmco7jh2kAWy7hFIDm08gleUGC2wsZod6ALqxHJ1bR1EBRTHz2Ag/fuy7Av18a4Ec3hHi518M7KGOpekhMCQCduPS73ULIax+Zk6xUfdz/lKzEYkSlr79NhLCO/ijD9tKtE5w4RiBNX5lz7uzycfs9BJHzUbuT1DYvLftEveBgOSnxHUkGyiVcyAcwRz7Yx4SVb+2wZDKHLhe1N79TvjbzEgMSxNWDLt6/ZxNtHdIwZmLqhJNYwlGJZdWyTTL6sh5dePCJCMd/olsBKYO6o2p/w8Uj93Z0OaJ25877myIoIba3iYLQpNJCA5iSgTaA6eosApgDmN1msroN6FhJZP0kJ3N/3pfPl+aR5hDWT1/z300sf6cuvKA+sUlRVl9tVkDe+1iA4z4uDVyKigxoMXiaDM1NEDu5zcPHDbc1xT3wGqJUJAZQbmocFUDBgWZ5mw2W+Xs04Mw+dl/7v+EmzrxN53PNEl1X7Jv70fUR3hysYxgFEUgQVa/9TKXSsO7Co7MinPIZytxkn4lJidJRbl6ct+FSJsd7uOibTWEjkuNZopfsJB1FC8cB1bhGegT5lwEgh8bSJyYJIJXRo88xgCAT13LSrqg+oIIhkHvt18Std0ZYPVRBnyjjKIl9cr1Dcpf6rHndQmtrTd6aDICVEc5UAB/eiac0RL0N66/lHuYEwNiQtmtjEgBHSiq1aHuXiBsRX1vtYLspvEk7wc5vGUIjkEcc08Sit6pi443YJzzAYqIKDj6Crl+W+1qStazJWQTxg/s1MHdhKCq8uPGa8jflyrmt4oG2J2IC1ioRnVd0uRXE3ZprUcO+B0SipkWDZxLvlRM8+IgQawc6RVCBdhx31n/vuuw213ySDyQB0LiGOsZxxk8Occ/vVDqgnzlnFVDNrUwQADZaA5jhyBYlEIoE0GPZiMg+qpyid7CETejE8SdRDkpFkiGXQt/H3Y9K04YykFVZC1c6mLiNvc11NNKcnXB5bC8GUmwwOf/da1nZ0CmW9O/+GIrgbNaMyYvGZEAbgfL6bgFn0kxYyRc+rK+LElxtythEO/HY45vYwEqEAQp6FhO14/Nf0Vv8bZBGphR4gcw363a2sa6a455/Mc2pKp6Yw11deQBarpzNUaOCOGK/EThQEc0F2ojX3qzcNK0lDfC4bIpFF3c+wJdhSAG/HgX89g+B2OEpS0q2IK1qA6hikeKYkXIlWFzS//LVJh6atY1QUBaAhiu3tQBqGkM/sePT7E9DmrvVB+vYc+9IVJRmJqgMa5aSrB7okjWA3GgzXMF+B6syXh2BzgQYWoGafkDZ4wknyiiOg6nTuuGHfJgO/EADSHuLWlhsNrT2ymXImnzmONtHCEyaY+gH0y83M996j0zWx5MxJycqrXzcfIfaN7xZ1kD/0Ahr2dyUC1IKqJxjmapZ2U+DyW0aujpMc+AxPJgAaJgxJlBbwoXmlq+cY2Yf8cKIQdZWV3D0x4wIsybFOXyD0F77NbB2gAXiBREXXMBdn5O5fNNApyefl6kzQLSrIxSAWRCzfQWAzWZzugRQbvVKB1QtThkDKCnK66vazI19NA9mv0TvgUZ0zo2r7Qkzbw1FJQIBZGzwn76gouLalss5j5QB0F6uqeP2+em+GQDrQXAAD5ADudGGLwOjL5yKjW0tgBZombGUr0k76z8ub23D8R1e03YN0bexqnYgFfDQ7AAdHTJeKLkqe56YsDVpbaqk+sXLd4Q+op8SL6qf2LFeD8OpPCg4cFKEeUstM8aeuA3O1pDBfSwVWTss9/syoJq5aZVNu+JqViLIV5usG6rggEMacejL7p9LMThmu+K4FNcpsFsAmJLLDMw6jhM5rjNIP5Av2Xr+dZbKcttUa9Ay1Ut5JGzAEYxtxtx0qchrcjnkLV8aslN2DvHGm6ywKoh3yPzweq045ITZT6RTxxgTNElzVMJx8ncKbA2a5kx1zPHdtXxvTNHxnBfFy7UqgQheMlKcmqwFZObVJzZ4AkDZLvvmyFKVhyBX3fgrmQ615ZgMvXv41veZCy6JZPpLS+W7DMW7EbYAvFyloMDIcpy1nNV9Jctb2oue7z0g3lzk+u7FQiAWPFxyJV8PQt9PcZqOztrAmVyYx5G62r3lDvAkRXr+xZKj7AkyubTdlAYWr3WEuyYUx+d1OtXsP1IeZHSyDfaY0zJ9E86kDeh53ukCQN/3t/UCfxPrjXf/UICV/dywkuyjjbNWNoB5xYgWJe/RynIhgwAM/3MHUZ4bxrYLL+H7C8sYpB/6dCiKi1gvkz/BMVCOzBPA5NmE9rm6v/RW+sIwdJMXkHnOtexATrj5l01x0zF4cdpPLe28Qm0THBPkHFA18HxV3ZrhCvb/sNxXIm9QvnGX4axGt495ixyxdWHDcBUfPoyKQ4HXcoKjUF4xuwZMUQyg3U8RV6vru1+LweOnVqv1OJ63mkmWHXdu4PU+ykK1ldQEUUSBDbDywBwFOP3N4MHyjRXsugffNJncqE47nnWuFCdCccxMFIecYHpSLY1fi2IOSwFoaGkTxJzzlex7bfz48dUUgPy4QfDJIJIC/cBDI6xY58qoLLfVizdwSADl23w0eBrcFiBavxMPRb5HYfG6qtjPy+oGToq7Mat1H83uCPP+6oltWy8v5QsxtOIwXL2tpOz2i8RelP9HBrDu+wfZ2MUf13evlC/9YoF2A3NeZT1Ku8jUyTdEluTb1lT8rlclXEi6jcqmdyghZupWiN/sw+P8li+lXbK+ivdOk+6Y5go+wBlnM3zULihWHAw35Uzq3aXW12B5ieN5Z9uYZT6O687kO5SLZb5nOcDX/jPC3Dc8sR9jLUpYA5Z28DtLa8Uxfbx1PxIDoqtRxa57UDlI7mJcMog8zHndEzmOR2ZHIncrNy9mJ/W3IvXWym/YWLX8+KH/rSiKUK9L82bSpCYOPbwHhx7JmhYPh+jv/wfJsXyMnxDC8wKRY3C9ABMmhjjyaB/Tp3vYYccItVqAMJTHR6cwpy2Hgpy2+HxNAcIoRBiGrAk/x8Zo1E8Yhh+PomhRo9GA64ToaA/Q0R69yxTC90NE6kb5HfghOjpCtLdHqNeSY39LIvNw3lEUzY+i6DAbmzF/6vV6IwzDy8MwXM1BSfbF/p5IzzEIgqVhGF7Q09NTszHZqk+z2RwXhuFZYRg+Eobhm/pCf08UhuGqMAzvC8Pwc57n+TYGeZ//A2K2UsIAVfooAAAAAElFTkSuQmCC" alt="FaultBox Logo" style="border-radius: 10px;">
         <div class="header-text">
           <h1>FaultBox</h1>
-          <div class="subtitle">Chaos Injection Proxy</div>
+          <div class="subtitle">Next-Gen Chaos Injection Proxy &amp; Resilience Engine</div>
         </div>
       </div>
       <div class="header-actions">
         <span id="conn-status" class="badge badge-green">Live Feed</span>
+        <button class="btn btn-scenario" onclick="openScenarioModal()">
+          <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M11.251.068a.5.5 0 0 1 .265.565l-1.5 5.5h4.484a.5.5 0 0 1 .38.825l-9.5 10a.5.5 0 0 1-.847-.568l2-6.5H2a.5.5 0 0 1-.416-.777l9-9a.5.5 0 0 1 .667-.045z"/></svg>
+          Run Scenario
+        </button>
+        <button class="btn" onclick="exportTopology()" title="Export topology JSON">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 16 16"><path d="M8 2v8M4 7l4 4 4-4M2 13h12" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Export
+        </button>
+        <button class="btn" onclick="openModal('modal-import')" title="Import topology JSON">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 16 16"><path d="M8 10V2M4 5l4-4 4 4M2 13h12" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Import
+        </button>
         <button class="btn btn-primary" onclick="openModal('modal-proxy')">
           <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 1v12M1 7h12"/></svg>
           New Proxy
@@ -629,9 +758,34 @@ def get_ui_html() -> str:
       </div>
     </div>
 
+    <!-- Search & Filter Toolbar -->
+    <div class="filter-bar">
+      <div class="filter-search-box">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input type="text" id="proxy-search" class="filter-search-input" placeholder="Search proxies by name, port, or address..." oninput="applyFilters()">
+      </div>
+      <div class="filter-group">
+        <span style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 600; margin-right: 4px;">Protocol:</span>
+        <div class="filter-chip active" data-proto="all" onclick="setProtoFilter('all')">ALL</div>
+        <div class="filter-chip" data-proto="tcp" onclick="setProtoFilter('tcp')">TCP</div>
+        <div class="filter-chip" data-proto="udp" onclick="setProtoFilter('udp')">UDP</div>
+      </div>
+      <div class="filter-group">
+        <span style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 600; margin-right: 4px;">State:</span>
+        <div class="filter-chip active" data-state="all" onclick="setStateFilter('all')">ALL</div>
+        <div class="filter-chip" data-state="active" onclick="setStateFilter('active')">Active</div>
+        <div class="filter-chip" data-state="paused" onclick="setStateFilter('paused')">Paused</div>
+        <div class="filter-chip" data-state="toxics" onclick="setStateFilter('toxics')">With Toxics</div>
+        <div class="filter-chip" data-state="clean" onclick="setStateFilter('clean')">Clean</div>
+      </div>
+    </div>
+
     <div class="panel">
       <div class="panel-header">
-        <span class="panel-title">Active Chaos Proxies</span>
+        <span class="panel-title">
+          <span>Active Chaos Proxies</span>
+          <span id="proxy-filter-count" class="badge badge-cyan" style="font-size: 10px; padding: 2px 8px;">0 total</span>
+        </span>
         <button class="btn btn-sm" onclick="fetchProxies()">
           <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 6a5 5 0 019.47-2M11 6a5 5 0 01-9.47 2"/><path d="M1 1v3h3M11 11V8H8"/></svg>
           Refresh
@@ -641,7 +795,7 @@ def get_ui_html() -> str:
         <table>
           <thead>
             <tr>
-              <th style="min-width: 120px;">Name</th>
+              <th style="min-width: 140px;">Name &amp; Protocol</th>
               <th style="min-width: 130px;">Listen</th>
               <th style="min-width: 130px;">Upstream</th>
               <th style="min-width: 85px;">State</th>
@@ -661,6 +815,71 @@ def get_ui_html() -> str:
             </tr>
           </tbody>
         </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Visual Scenario Runner Modal -->
+  <div class="modal-overlay" id="modal-scenario">
+    <div class="modal modal-lg">
+      <div class="modal-title">
+        <span>Chaos Scenario Runner</span>
+        <span class="badge badge-purple">Quality Gates &amp; SLAs</span>
+      </div>
+      <div class="form-row">
+        <div class="form-group" style="grid-column: span 2;">
+          <label>Load Scenario Preset</label>
+          <select id="scenario-preset" onchange="loadScenarioPreset()">
+            <option value="cascading">Cascading Failure (Latency Spike &rarr; HTTP 503 &rarr; TCP RST)</option>
+            <option value="flapping">Flapping Link &amp; Packet Drop (UDP/TCP Jitter)</option>
+            <option value="mobile3g">Slow 3G Network (300ms Latency + 32KB/s Bandwidth + Packet Slicer)</option>
+            <option value="tracing">Distributed Tracing (W3C Baggage &amp; PostgreSQL Wire Fault)</option>
+            <option value="quality_gate">SLA Quality Gate (Verify Max Errors &lt;= 0, Active Connections &gt; 0)</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Declarative Scenario YAML</label>
+        <textarea id="scenario-yaml" rows="11" placeholder="name: chaos-experiment&#10;target_proxy: order-db&#10;phases:..."></textarea>
+      </div>
+
+      <div id="scenario-results" style="display: none;">
+        <div class="timeline-container">
+          <div class="timeline-header">
+            <span id="scenario-report-title">Execution Report</span>
+            <span id="scenario-report-badge" class="badge badge-green">COMPLETED</span>
+          </div>
+          <div id="scenario-assertion-list"></div>
+          <div style="font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; margin: 10px 0 6px;">Executed Event Timeline:</div>
+          <div class="timeline-events" id="scenario-event-list"></div>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn" onclick="closeModal('modal-scenario')">Close</button>
+        <button class="btn btn-scenario" id="btn-run-scenario" onclick="submitRunScenario()">
+          <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M11.251.068a.5.5 0 0 1 .265.565l-1.5 5.5h4.484a.5.5 0 0 1 .38.825l-9.5 10a.5.5 0 0 1-.847-.568l2-6.5H2a.5.5 0 0 1-.416-.777l9-9a.5.5 0 0 1 .667-.045z"/></svg>
+          Execute Scenario
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Topology Import Modal -->
+  <div class="modal-overlay" id="modal-import">
+    <div class="modal">
+      <div class="modal-title">Import Topology Snapshot</div>
+      <div class="form-group">
+        <label>Upload JSON File</label>
+        <input type="file" id="import-file" accept=".json" onchange="handleTopologyFileUpload(event)">
+      </div>
+      <div class="form-group">
+        <label>Or Paste Topology JSON</label>
+        <textarea id="import-json" rows="8" placeholder='{"proxies": [...]}'></textarea>
+      </div>
+      <div class="modal-actions">
+        <button class="btn" onclick="closeModal('modal-import')">Cancel</button>
+        <button class="btn btn-primary" onclick="submitImportTopology()">Apply Topology</button>
       </div>
     </div>
   </div>
@@ -802,6 +1021,11 @@ def get_ui_html() -> str:
   <div class="toast-container" id="toast-container"></div>
 
   <script>
+    /* ── Global State & Filters ── */
+    let allProxies = [];
+    let currentProtoFilter = 'all';
+    let currentStateFilter = 'all';
+
     /* ── Toxic field definitions ── */
     const toxicFieldDefs = {
       latency: [
@@ -913,6 +1137,137 @@ def get_ui_html() -> str:
       ]
     };
 
+    /* ── Scenario Presets ── */
+    const scenarioPresets = {
+      cascading: `name: cascading-failure
+description: "Simulate gradual service degradation escalating to complete crash"
+phases:
+  - time_seconds: 0.0
+    action: add_toxic
+    toxic:
+      name: progressive-latency
+      type: waveform_latency
+      attributes:
+        base_latency_ms: 150
+        amplitude_ms: 400
+        period_sec: 10
+  - time_seconds: 5.0
+    action: add_toxic
+    toxic:
+      name: upstream-503
+      type: http_error
+      toxicity: 0.4
+      attributes:
+        status_code: 503
+  - time_seconds: 12.0
+    action: add_toxic
+    toxic:
+      name: peer-rst
+      type: reset_peer
+      attributes:
+        byte_offset: 2048
+assertions:
+  - metric: errors_total
+    operator: ">="
+    threshold: 1
+    description: "Verify circuit breaker recorded upstream faults"`,
+
+      flapping: `name: flapping-and-packet-loss
+description: "Intermittent link disruption and UDP datagram loss"
+phases:
+  - time_seconds: 0.0
+    action: add_toxic
+    toxic:
+      name: flapping-link
+      type: flapping
+      attributes:
+        up_duration_sec: 4.0
+        down_duration_sec: 2.0
+        down_action: reset
+  - time_seconds: 0.0
+    action: add_toxic
+    toxic:
+      name: udp-drop
+      type: packet_drop
+      attributes:
+        drop_rate: 0.3
+        consecutive: 2
+  - time_seconds: 10.0
+    action: reset`,
+
+      mobile3g: `name: slow-3g-mobile
+description: "Simulate constrained mobile cellular network conditions"
+phases:
+  - time_seconds: 0.0
+    action: add_toxic
+    toxic:
+      name: high-rtt
+      type: latency
+      attributes:
+        latency_ms: 300
+        jitter_ms: 80
+  - time_seconds: 0.0
+    action: add_toxic
+    toxic:
+      name: 3g-throttle
+      type: bandwidth
+      attributes:
+        rate_kbps: 32
+  - time_seconds: 0.0
+    action: add_toxic
+    toxic:
+      name: cell-slicer
+      type: slicer
+      attributes:
+        slice_size: 128
+        delay_ms: 15`,
+
+      tracing: `name: distributed-tracing-w3c
+description: "Inject W3C trace context headers and PostgreSQL wire faults"
+phases:
+  - time_seconds: 0.0
+    action: add_toxic
+    toxic:
+      name: traceparent-tagger
+      type: trace_inject
+      attributes:
+        mode: w3c
+        baggage_extra: "region=eu-west-1,tenant=enterprise"
+  - time_seconds: 3.0
+    action: add_toxic
+    toxic:
+      name: pg-failover
+      type: postgres_fault
+      attributes:
+        sqlstate: "57P01"
+        message: "terminating connection due to administrator command"
+        severity: "FATAL"`,
+
+      quality_gate: `name: sla-quality-gate
+description: "Resilience gate evaluating system metrics and error budgets"
+phases:
+  - time_seconds: 0.0
+    action: add_toxic
+    toxic:
+      name: mild-jitter
+      type: latency
+      attributes:
+        latency_ms: 50
+        jitter_ms: 10
+  - time_seconds: 2.0
+    action: remove_toxic
+    toxic_name: mild-jitter
+assertions:
+  - metric: errors_total
+    operator: "<="
+    threshold: 0
+    description: "Zero errors during baseline run"
+  - metric: bytes_total
+    operator: ">="
+    threshold: 0
+    description: "Verify data transferred through proxy"`
+    };
+
     /* ── Toast system ── */
     function toast(message, type = 'success') {
       const container = document.getElementById('toast-container');
@@ -938,18 +1293,207 @@ def get_ui_html() -> str:
     function openModal(id) { document.getElementById(id).classList.add('active'); }
     function closeModal(id) { document.getElementById(id).classList.remove('active'); }
 
-    // Close modals on overlay click
     document.addEventListener('click', (e) => {
       if (e.target.classList.contains('modal-overlay')) {
         e.target.classList.remove('active');
       }
     });
-    // Close modals on Escape
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         document.querySelectorAll('.modal-overlay.active').forEach(m => m.classList.remove('active'));
       }
     });
+
+    /* ── Scenario Modal Helpers ── */
+    function openScenarioModal() {
+      loadScenarioPreset();
+      document.getElementById('scenario-results').style.display = 'none';
+      openModal('modal-scenario');
+    }
+
+    function loadScenarioPreset() {
+      const key = document.getElementById('scenario-preset').value;
+      const yaml = scenarioPresets[key] || '';
+      document.getElementById('scenario-yaml').value = yaml;
+    }
+
+    async function submitRunScenario() {
+      const yamlContent = document.getElementById('scenario-yaml').value.trim();
+      if (!yamlContent) { toast('Please provide scenario YAML', 'error'); return; }
+
+      const runBtn = document.getElementById('btn-run-scenario');
+      runBtn.disabled = true;
+      runBtn.innerHTML = 'Running...';
+
+      try {
+        const resp = await fetch('/scenarios/run', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ yaml_content: yamlContent })
+        });
+
+        if (!resp.ok) {
+          const err = await resp.json();
+          toast(err.detail || 'Scenario failed to execute', 'error');
+          return;
+        }
+
+        const report = await resp.json();
+        renderScenarioReport(report);
+        toast(`Scenario "${report.name}" finished in ${report.duration_seconds}s!`, report.success ? 'success' : 'error');
+        fetchProxies();
+      } catch (err) {
+        toast('Failed to run scenario: ' + err, 'error');
+      } finally {
+        runBtn.disabled = false;
+        runBtn.innerHTML = '<svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M11.251.068a.5.5 0 0 1 .265.565l-1.5 5.5h4.484a.5.5 0 0 1 .38.825l-9.5 10a.5.5 0 0 1-.847-.568l2-6.5H2a.5.5 0 0 1-.416-.777l9-9a.5.5 0 0 1 .667-.045z"/></svg> Execute Scenario';
+      }
+    }
+
+    function renderScenarioReport(report) {
+      const resultsContainer = document.getElementById('scenario-results');
+      resultsContainer.style.display = 'block';
+
+      document.getElementById('scenario-report-title').textContent = `${report.name} (${report.duration_seconds}s)`;
+      const badge = document.getElementById('scenario-report-badge');
+      if (report.success) {
+        badge.className = 'badge badge-green';
+        badge.textContent = 'PASSED';
+      } else {
+        badge.className = 'badge badge-red';
+        badge.textContent = 'FAILED';
+      }
+
+      // Render Assertions
+      const assertContainer = document.getElementById('scenario-assertion-list');
+      if (report.assertions && report.assertions.length > 0) {
+        assertContainer.innerHTML = report.assertions.map(a => `
+          <div class="assertion-card ${a.passed ? 'pass' : 'fail'}">
+            <div>
+              <span style="font-weight: 600; color: var(--text-bright);">${a.metric}</span>
+              <span style="color: var(--text-muted); margin: 0 4px;">${a.operator} ${a.threshold}</span>
+              <span style="color: var(--text-muted); font-size: 11px;">(${a.description || 'SLA'})</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-family: var(--mono); color: var(--text-bright);">Actual: ${a.actual_value}</span>
+              <span class="badge ${a.passed ? 'badge-green' : 'badge-red'}">${a.passed ? 'PASS' : 'FAIL'}</span>
+            </div>
+          </div>
+        `).join('');
+      } else {
+        assertContainer.innerHTML = '<div style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">No assertions defined in scenario.</div>';
+      }
+
+      // Render Events
+      const eventContainer = document.getElementById('scenario-event-list');
+      eventContainer.innerHTML = report.events.map(e => `
+        <div class="timeline-event-item ${e.success ? 'success' : 'fail'}">
+          <span class="timeline-time">+${e.time_offset.toFixed(2)}s</span>
+          <span style="font-weight: 600; color: var(--accent);">${e.action}</span>
+          <span style="color: var(--text-bright);">${e.target_proxy || 'aggregate'}</span>
+          <span style="color: var(--text-muted); margin-left: auto;">${e.message}</span>
+        </div>
+      `).join('');
+    }
+
+    /* ── Topology Export & Import ── */
+    async function exportTopology() {
+      try {
+        const resp = await fetch('/topology/export');
+        if (!resp.ok) throw new Error('Export failed');
+        const data = await resp.json();
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `faultbox-topology-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-')}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        toast('Cluster topology exported successfully!');
+      } catch (err) {
+        toast('Failed to export topology: ' + err, 'error');
+      }
+    }
+
+    function handleTopologyFileUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        document.getElementById('import-json').value = e.target.result;
+      };
+      reader.readAsText(file);
+    }
+
+    async function submitImportTopology() {
+      const raw = document.getElementById('import-json').value.trim();
+      if (!raw) { toast('Please provide topology JSON', 'error'); return; }
+      try {
+        const data = JSON.parse(raw);
+        const resp = await fetch('/topology/import', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        if (resp.ok) {
+          closeModal('modal-import');
+          document.getElementById('import-json').value = '';
+          toast('Topology imported successfully!');
+          fetchProxies();
+        } else {
+          const err = await resp.json();
+          toast(err.detail || 'Import failed', 'error');
+        }
+      } catch (err) {
+        toast('Invalid JSON format: ' + err, 'error');
+      }
+    }
+
+    /* ── Search & Filters ── */
+    function setProtoFilter(proto) {
+      currentProtoFilter = proto;
+      document.querySelectorAll('[data-proto]').forEach(el => {
+        el.classList.toggle('active', el.getAttribute('data-proto') === proto);
+      });
+      applyFilters();
+    }
+
+    function setStateFilter(state) {
+      currentStateFilter = state;
+      document.querySelectorAll('[data-state]').forEach(el => {
+        el.classList.toggle('active', el.getAttribute('data-state') === state);
+      });
+      applyFilters();
+    }
+
+    function applyFilters() {
+      const query = document.getElementById('proxy-search').value.toLowerCase().trim();
+      const filtered = allProxies.filter(p => {
+        // Search query
+        const matchQuery = !query
+          || p.name.toLowerCase().includes(query)
+          || p.listen.toLowerCase().includes(query)
+          || p.upstream.toLowerCase().includes(query)
+          || (p.protocol || 'tcp').toLowerCase().includes(query);
+
+        // Protocol filter
+        const proto = (p.protocol || 'tcp').toLowerCase();
+        const matchProto = currentProtoFilter === 'all' || proto === currentProtoFilter;
+
+        // State filter
+        let matchState = true;
+        if (currentStateFilter === 'active') matchState = p.enabled;
+        else if (currentStateFilter === 'paused') matchState = !p.enabled;
+        else if (currentStateFilter === 'toxics') matchState = p.toxics && p.toxics.length > 0;
+        else if (currentStateFilter === 'clean') matchState = !p.toxics || p.toxics.length === 0;
+
+        return matchQuery && matchProto && matchState;
+      });
+
+      renderProxies(filtered, allProxies.length);
+    }
 
     /* ── Dynamic form fields ── */
     function updateToxicFields() {
@@ -977,7 +1521,6 @@ def get_ui_html() -> str:
         return '<div class="form-group"><label>' + f.label + '</label>' + inputHtml + '</div>';
       }).join('');
 
-      // Sync to raw JSON
       syncFieldsToJson();
     }
 
@@ -997,7 +1540,6 @@ def get_ui_html() -> str:
       document.getElementById('toxic-attributes').value = JSON.stringify(attrs, null, 2);
     }
 
-    // Listen for field changes to sync JSON
     document.getElementById('toxic-dynamic-fields').addEventListener('input', syncFieldsToJson);
     document.getElementById('toxic-dynamic-fields').addEventListener('change', syncFieldsToJson);
 
@@ -1041,7 +1583,6 @@ def get_ui_html() -> str:
         else ctx.lineTo(x, y);
       });
 
-      // Fill area under curve
       ctx.lineTo((data.length - 1) * stepX, h);
       ctx.lineTo(0, h);
       ctx.closePath();
@@ -1051,7 +1592,6 @@ def get_ui_html() -> str:
       ctx.fillStyle = grad;
       ctx.fill();
 
-      // Stroke line
       ctx.beginPath();
       data.forEach((v, i) => {
         const x = i * stepX;
@@ -1064,14 +1604,16 @@ def get_ui_html() -> str:
       ctx.stroke();
     }
 
-    /* ── Format bytes ── */
+    /* ── Format helpers ── */
     function fmtBytes(bytes) {
+      if (!bytes || bytes === 0) return '0 B';
       if (bytes < 1024) return bytes.toFixed(0) + ' B';
       if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
       return (bytes / 1048576).toFixed(2) + ' MB';
     }
 
     function fmtRate(kbps) {
+      if (!kbps || kbps === 0) return '0 B/s';
       if (kbps < 1) return (kbps * 1024).toFixed(0) + ' B/s';
       if (kbps < 1024) return kbps.toFixed(1) + ' KB/s';
       return (kbps / 1024).toFixed(2) + ' MB/s';
@@ -1082,19 +1624,22 @@ def get_ui_html() -> str:
       try {
         const resp = await fetch('/proxies');
         if (!resp.ok) return;
-        const proxies = await resp.json();
-        renderProxies(proxies);
+        allProxies = await resp.json();
+        applyFilters();
       } catch (err) {
         console.error('Failed fetching proxies:', err);
       }
     }
 
-    function renderProxies(proxies) {
+    function renderProxies(proxies, totalCount = null) {
+      const countTotal = totalCount !== null ? totalCount : proxies.length;
+      document.getElementById('proxy-filter-count').textContent = `${proxies.length} / ${countTotal}`;
+
       const tbody = document.getElementById('proxy-table-body');
       if (!proxies.length) {
         tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state">'
           + '<svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 9v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round"/></svg>'
-          + '<p>No proxies registered yet.<br>Click <strong>New Proxy</strong> to create one.</p>'
+          + '<p>No proxies match the current filter criteria.<br>Click <strong>New Proxy</strong> to create one or clear search filters.</p>'
           + '</div></td></tr>';
       } else {
         tbody.innerHTML = proxies.map(p => {
@@ -1104,7 +1649,7 @@ def get_ui_html() -> str:
 
           const toxicsHtml = p.toxics.length
             ? p.toxics.map(t =>
-                '<span class="toxic-tag toxic-' + t.type + '">'
+                '<span class="toxic-tag toxic-' + t.type + '" title="Toxicity: ' + (t.toxicity * 100).toFixed(0) + '% | Dir: ' + t.direction + '">'
                 + t.name + ' <span style="opacity:0.6">(' + t.type + ')</span> '
                 + '<span class="toxic-delete" onclick="removeToxic(\\'' + p.name + '\\', \\'' + t.name + '\\')">&times;</span>'
                 + '</span>'
@@ -1154,12 +1699,12 @@ def get_ui_html() -> str:
         }).join('');
       }
 
-      // Update KPIs
-      const proxyCount = proxies.length;
-      const connActive = proxies.reduce((a, p) => a + (p.stats.connections_active || 0), 0);
-      const totalInKbps = proxies.reduce((a, p) => a + (p.stats.throughput_in_kbps || 0), 0);
-      const totalOutKbps = proxies.reduce((a, p) => a + (p.stats.throughput_out_kbps || 0), 0);
-      const totalErrors = proxies.reduce((a, p) => a + (p.stats.errors_total || 0), 0);
+      // Update KPIs from allProxies
+      const proxyCount = allProxies.length;
+      const connActive = allProxies.reduce((a, p) => a + (p.stats.connections_active || 0), 0);
+      const totalInKbps = allProxies.reduce((a, p) => a + (p.stats.throughput_in_kbps || 0), 0);
+      const totalOutKbps = allProxies.reduce((a, p) => a + (p.stats.throughput_out_kbps || 0), 0);
+      const totalErrors = allProxies.reduce((a, p) => a + (p.stats.errors_total || 0), 0);
 
       document.getElementById('kpi-proxies').textContent = proxyCount;
       document.getElementById('kpi-conn-active').textContent = connActive;
@@ -1167,7 +1712,6 @@ def get_ui_html() -> str:
       document.getElementById('kpi-throughput-out').textContent = fmtRate(totalOutKbps);
       document.getElementById('kpi-errors').textContent = totalErrors;
 
-      // Push sparkline data
       pushSpark(sparkData.proxies, proxyCount);
       pushSpark(sparkData.conn, connActive);
       pushSpark(sparkData.inRate, totalInKbps);
@@ -1260,7 +1804,6 @@ def get_ui_html() -> str:
       const direction = document.getElementById('toxic-direction').value;
       const toxicity = parseFloat(document.getElementById('toxic-probability').value) || 1.0;
 
-      // Sync fields to JSON first
       syncFieldsToJson();
 
       let attributes = {};
@@ -1271,7 +1814,6 @@ def get_ui_html() -> str:
         return;
       }
 
-      // Convert numeric string values from selects (e.g., grpc_status, status_code)
       if (attributes.grpc_status !== undefined) attributes.grpc_status = parseInt(attributes.grpc_status);
       if (attributes.status_code !== undefined) attributes.status_code = parseInt(attributes.status_code);
 
@@ -1295,7 +1837,6 @@ def get_ui_html() -> str:
     }
 
     /* ── WebSocket telemetry with reconnection ── */
-    let wsReconnectTimer = null;
     let wsReconnectAttempts = 0;
 
     function initTelemetry() {
@@ -1311,8 +1852,8 @@ def get_ui_html() -> str:
 
       ws.onmessage = (event) => {
         try {
-          const proxies = JSON.parse(event.data);
-          renderProxies(proxies);
+          allProxies = JSON.parse(event.data);
+          applyFilters();
         } catch (e) {}
       };
 
@@ -1321,10 +1862,9 @@ def get_ui_html() -> str:
         badge.textContent = 'Reconnecting';
         badge.className = 'badge badge-yellow';
 
-        // Exponential backoff reconnection (max 30s)
         const delay = Math.min(1000 * Math.pow(1.5, wsReconnectAttempts), 30000);
         wsReconnectAttempts++;
-        wsReconnectTimer = setTimeout(initTelemetry, delay);
+        setTimeout(initTelemetry, delay);
       };
 
       ws.onerror = () => ws.close();

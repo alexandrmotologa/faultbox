@@ -150,9 +150,7 @@ class ScenarioRunner:
                 )
             )
 
-        assertions_passed = (
-            all(a.passed for a in assertion_results) if assertion_results else True
-        )
+        assertions_passed = all(a.passed for a in assertion_results) if assertion_results else True
         total_success = all_events_ok and assertions_passed
 
         return ScenarioReport(

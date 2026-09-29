@@ -7,6 +7,7 @@ import pytest
 
 from faultbox.api.server import create_app
 from faultbox.core.proxy import ProxyManager
+from faultbox.toxics.factory import create_toxic
 
 
 @pytest.fixture
@@ -255,4 +256,113 @@ async def test_api_udp_proxy_and_packet_toxics(proxy_manager: ProxyManager) -> N
         assert tr_data["attributes"]["mode"] == "w3c"
 
 
+@pytest.mark.asyncio
+async def test_api_scenarios_run_endpoint(proxy_manager: ProxyManager) -> None:
+    """Validate executing declarative YAML scenarios through the REST API."""
+    app = create_app(proxy_manager)
 
+    # Pre-create target proxy
+    await proxy_manager.create_proxy("order-api", "127.0.0.1:28100", "127.0.0.1:28101")
+
+    scenario_yaml = """
+name: api-chaos-run
+target_proxy: order-api
+phases:
+  - time_seconds: 0.0
+    action: add_toxic
+    toxic:
+      name: latency-spike
+      type: latency
+      attributes:
+        latency_ms: 10
+  - time_seconds: 0.05
+    action: remove_toxic
+    toxic_name: latency-spike
+assertions:
+  - metric: errors_total
+    operator: "<="
+    threshold: 0
+    description: "Zero errors allowed"
+"""
+
+    transport = httpx.ASGITransport(app=app)  # type: ignore[arg-type]
+    async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+        resp = await client.post(
+            "/scenarios/run",
+            json={"yaml_content": scenario_yaml},
+        )
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["name"] == "api-chaos-run"
+        assert data["total_phases"] == 2
+        assert data["executed_phases"] == 2
+        assert data["assertions_passed"] is True
+        assert data["success"] is True
+        assert len(data["assertions"]) == 1
+        assert data["assertions"][0]["passed"] is True
+
+        # Test invalid YAML error handling
+        bad_resp = await client.post(
+            "/scenarios/run",
+            json={"yaml_content": "invalid: [yaml: broken"},
+        )
+        assert bad_resp.status_code == 400
+
+
+@pytest.mark.asyncio
+async def test_api_topology_export_and_import(proxy_manager: ProxyManager) -> None:
+    """Validate full cluster topology export and restoration."""
+    app = create_app(proxy_manager)
+
+    # Setup initial cluster topology
+    p1 = await proxy_manager.create_proxy("web-front", "127.0.0.1:28200", "127.0.0.1:28201")
+    t1 = create_toxic("web-lat", "latency", attributes={"latency_ms": 25})
+    p1.pipeline.add_toxic(t1)
+
+    transport = httpx.ASGITransport(app=app)  # type: ignore[arg-type]
+    async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+        # 1. Export topology
+        export_resp = await client.get("/topology/export")
+        assert export_resp.status_code == 200
+        export_data = export_resp.json()
+        assert export_data["version"] == "1.0"
+        assert len(export_data["proxies"]) >= 1
+
+        # Find web-front in exported proxies
+        web_exported = next(p for p in export_data["proxies"] if p["name"] == "web-front")
+        assert len(web_exported["toxics"]) == 1
+
+        # 2. Delete proxy from manager
+        await proxy_manager.delete_proxy("web-front")
+        assert proxy_manager.get_proxy("web-front") is None
+
+        # 3. Import topology snapshot back
+        import_payload = {
+            "proxies": [
+                {
+                    "name": "web-front",
+                    "listen": "127.0.0.1:28200",
+                    "upstream": "127.0.0.1:28201",
+                    "protocol": "tcp",
+                    "enabled": True,
+                    "toxics": [
+                        {
+                            "name": "web-lat",
+                            "type": "latency",
+                            "direction": "both",
+                            "toxicity": 1.0,
+                            "attributes": {"latency_ms": 25},
+                        }
+                    ],
+                }
+            ]
+        }
+        import_resp = await client.post("/topology/import", json=import_payload)
+        assert import_resp.status_code == 200
+
+        # Verify proxy and toxic restored
+        restored = proxy_manager.get_proxy("web-front")
+        assert restored is not None
+        assert restored.enabled is True
+        assert len(restored.pipeline.list_toxics()) == 1
+        assert restored.pipeline.list_toxics()[0].name == "web-lat"

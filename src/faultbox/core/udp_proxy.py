@@ -219,9 +219,7 @@ class UdpProxyInstance:
         except Exception:
             self.stats.record_error()
 
-    async def _handle_upstream_datagram(
-        self, data: bytes, client_addr: tuple[str, int]
-    ) -> None:
+    async def _handle_upstream_datagram(self, data: bytes, client_addr: tuple[str, int]) -> None:
         if not self.enabled or self._transport is None:
             return
 

@@ -12,11 +12,19 @@ from faultbox.api.schemas import (
     MessageResponse,
     ProxyCreateRequest,
     ProxyResponse,
+    ScenarioAssertionResponse,
+    ScenarioEventResponse,
+    ScenarioRunRequest,
+    ScenarioRunResponse,
+    TopologyExportResponse,
+    TopologyImportRequest,
     ToxicCreateRequest,
     ToxicResponse,
 )
 from faultbox.api.ui import get_ui_html
 from faultbox.core.metrics import generate_prometheus_metrics
+from faultbox.scenarios.runner import ScenarioRunner
+from faultbox.scenarios.schema import ScenarioConfig
 from faultbox.toxics.factory import create_toxic
 
 if TYPE_CHECKING:
@@ -167,5 +175,106 @@ def create_router(manager: ProxyManager) -> APIRouter:
                 detail=f"Toxic '{toxic_name}' not found on proxy '{name}'.",
             )
         return MessageResponse(status="ok", message=f"Toxic '{toxic_name}' removed.")
+
+    @router.post("/scenarios/run", response_model=ScenarioRunResponse)
+    async def run_scenario_endpoint(payload: ScenarioRunRequest) -> ScenarioRunResponse:
+        """Execute a declarative YAML chaos scenario against active proxies."""
+        try:
+            scenario = ScenarioConfig.from_yaml_string(payload.yaml_content)
+        except Exception as exc:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid scenario YAML: {exc}",
+            ) from exc
+
+        runner = ScenarioRunner(manager=manager, scenario=scenario)
+        report = await runner.run()
+
+        return ScenarioRunResponse(
+            name=report.name,
+            total_phases=report.total_phases,
+            executed_phases=report.executed_phases,
+            duration_seconds=report.duration_seconds,
+            events=[
+                ScenarioEventResponse(
+                    timestamp=e.timestamp,
+                    time_offset=e.time_offset,
+                    action=e.action,
+                    target_proxy=e.target_proxy,
+                    success=e.success,
+                    message=e.message,
+                )
+                for e in report.events
+            ],
+            assertions=[
+                ScenarioAssertionResponse(
+                    metric=a.metric,
+                    operator=a.operator,
+                    threshold=a.threshold,
+                    actual_value=a.actual_value,
+                    passed=a.passed,
+                    target_proxy=a.target_proxy,
+                    description=a.description,
+                    message=a.message,
+                )
+                for a in report.assertions
+            ],
+            assertions_passed=report.assertions_passed,
+            success=report.success,
+        )
+
+    @router.get("/topology/export", response_model=TopologyExportResponse)
+    async def export_topology() -> dict[str, Any]:
+        """Export the full cluster configuration and active toxics topology."""
+        proxies_data = [p.to_dict() for p in manager.list_proxies()]
+        return {"version": "1.0", "proxies": proxies_data}
+
+    @router.post("/topology/import", response_model=MessageResponse)
+    async def import_topology(payload: TopologyImportRequest) -> MessageResponse:
+        """Restore or apply a cluster topology snapshot."""
+        try:
+            for item in payload.proxies:
+                name = item["name"]
+                listen = item["listen"]
+                upstream = item["upstream"]
+                protocol = item.get("protocol", "tcp")
+                enabled = item.get("enabled", True)
+
+                instance = manager.get_proxy(name)
+                if not instance:
+                    instance = await manager.create_proxy(
+                        name=name,
+                        listen=listen,
+                        upstream=upstream,
+                        protocol=protocol,
+                    )
+
+                if enabled:
+                    await instance.resume()
+                else:
+                    await instance.pause()
+
+                instance.pipeline.clear()
+                for t_dict in item.get("toxics", []):
+                    t_type = t_dict.get("type") or t_dict.get("toxic_type", "")
+                    toxic = create_toxic(
+                        name=t_dict["name"],
+                        toxic_type=t_type,
+                        direction=t_dict.get("direction", "both"),
+                        toxicity=float(t_dict.get("toxicity", 1.0)),
+                        attributes=t_dict.get("attributes", {}),
+                        enabled=t_dict.get("enabled", True),
+                    )
+                    instance.pipeline.add_toxic(toxic)
+
+            return MessageResponse(
+                status="ok",
+                message=f"Successfully imported topology with {len(payload.proxies)} proxies.",
+            )
+        except Exception as exc:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Failed to import topology: {exc}",
+            ) from exc
 
     return router

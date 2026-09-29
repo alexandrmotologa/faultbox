@@ -74,7 +74,16 @@ class TraceInjectToxic(BaseToxic):
 
         # Check if first line resembles HTTP
         first_line = header_bytes.split(b"\r\n", 1)[0]
-        http_verbs = (b"GET ", b"POST ", b"PUT ", b"DELETE ", b"PATCH ", b"HEAD ", b"OPTIONS ", b"HTTP/")
+        http_verbs = (
+            b"GET ",
+            b"POST ",
+            b"PUT ",
+            b"DELETE ",
+            b"PATCH ",
+            b"HEAD ",
+            b"OPTIONS ",
+            b"HTTP/",
+        )
         if not any(first_line.startswith(verb) for verb in http_verbs):
             return chunk
 

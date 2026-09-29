@@ -39,14 +39,14 @@ async def test_trace_inject_w3c_mode(stream_context: StreamContext) -> None:
 @pytest.mark.asyncio
 async def test_trace_inject_b3_mode(stream_context: StreamContext) -> None:
     toxic = TraceInjectToxic(name="b3-tagger", mode="b3")
-    http_req = b"POST /orders HTTP/1.1\r\nHost: order.svc\r\n\r\n{\"id\": 1}"
+    http_req = b'POST /orders HTTP/1.1\r\nHost: order.svc\r\n\r\n{"id": 1}'
 
     transformed = await toxic.transform(http_req, stream_context)
     assert b"X-B3-TraceId: " in transformed
     assert b"X-B3-SpanId: " in transformed
     assert b"X-B3-Sampled: 1" in transformed
     assert b"X-FaultBox-Injected: true" in transformed
-    assert transformed.endswith(b"{\"id\": 1}")
+    assert transformed.endswith(b'{"id": 1}')
 
 
 @pytest.mark.asyncio

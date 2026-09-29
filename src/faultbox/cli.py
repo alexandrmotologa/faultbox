@@ -211,7 +211,9 @@ def create_proxy_cmd(
             timeout=5.0,
         )
         resp.raise_for_status()
-        console.print(f"[bold green]Proxy '{name}' ({protocol.upper()}) created successfully.[/bold green]")
+        console.print(
+            f"[bold green]Proxy '{name}' ({protocol.upper()}) created successfully.[/bold green]"
+        )
     except httpx.HTTPStatusError as exc:
         console.print(
             f"[bold red]Error ({exc.response.status_code}):[/bold red] {exc.response.text}"
@@ -385,9 +387,7 @@ def run_scenario_cmd(
 
             for a in report.assertions:
                 result_str = (
-                    "[bold green]PASS[/bold green]"
-                    if a.passed
-                    else "[bold red]FAIL[/bold red]"
+                    "[bold green]PASS[/bold green]" if a.passed else "[bold red]FAIL[/bold red]"
                 )
                 actual_fmt = (
                     f"{a.actual_value:.4f}".rstrip("0").rstrip(".")
