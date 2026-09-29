@@ -8,6 +8,7 @@ from typing import Any
 from faultbox.core.connection import BidirectionalPipe
 from faultbox.core.pipeline import ToxicPipeline
 from faultbox.core.stats import TrafficStats
+from faultbox.core.udp_proxy import UdpProxyInstance
 
 
 def parse_address(addr: str, default_host: str = "0.0.0.0") -> tuple[str, int]:
@@ -35,6 +36,7 @@ class ProxyInstance:
         self.listen_port = listen_port
         self.upstream_host = upstream_host
         self.upstream_port = upstream_port
+        self.protocol = "tcp"
 
         self.pipeline = ToxicPipeline()
         self.stats = TrafficStats()
@@ -130,6 +132,7 @@ class ProxyInstance:
         """Return proxy configuration and live runtime state."""
         return {
             "name": self.name,
+            "protocol": self.protocol,
             "listen": self.listen_address,
             "upstream": self.upstream_address,
             "enabled": self.enabled,
@@ -139,10 +142,10 @@ class ProxyInstance:
 
 
 class ProxyManager:
-    """Registry and lifecycle manager for multiple proxy instances."""
+    """Registry and lifecycle manager for multiple TCP and UDP proxy instances."""
 
     def __init__(self) -> None:
-        self._proxies: dict[str, ProxyInstance] = {}
+        self._proxies: dict[str, ProxyInstance | UdpProxyInstance] = {}
         self._lock = asyncio.Lock()
 
     async def create_proxy(
@@ -150,9 +153,10 @@ class ProxyManager:
         name: str,
         listen: str,
         upstream: str,
+        protocol: str = "tcp",
         start_immediately: bool = True,
-    ) -> ProxyInstance:
-        """Create and register a new proxy instance."""
+    ) -> ProxyInstance | UdpProxyInstance:
+        """Create and register a new proxy instance (TCP or UDP)."""
         async with self._lock:
             if name in self._proxies:
                 raise ValueError(f"Proxy with name '{name}' already exists.")
@@ -160,13 +164,23 @@ class ProxyManager:
             listen_host, listen_port = parse_address(listen, default_host="0.0.0.0")
             upstream_host, upstream_port = parse_address(upstream, default_host="127.0.0.1")
 
-            instance = ProxyInstance(
-                name=name,
-                listen_host=listen_host,
-                listen_port=listen_port,
-                upstream_host=upstream_host,
-                upstream_port=upstream_port,
-            )
+            proto = protocol.lower().strip()
+            if proto == "udp":
+                instance: ProxyInstance | UdpProxyInstance = UdpProxyInstance(
+                    name=name,
+                    listen_host=listen_host,
+                    listen_port=listen_port,
+                    upstream_host=upstream_host,
+                    upstream_port=upstream_port,
+                )
+            else:
+                instance = ProxyInstance(
+                    name=name,
+                    listen_host=listen_host,
+                    listen_port=listen_port,
+                    upstream_host=upstream_host,
+                    upstream_port=upstream_port,
+                )
 
             if start_immediately:
                 await instance.start()
@@ -174,11 +188,11 @@ class ProxyManager:
             self._proxies[name] = instance
             return instance
 
-    def get_proxy(self, name: str) -> ProxyInstance | None:
+    def get_proxy(self, name: str) -> ProxyInstance | UdpProxyInstance | None:
         """Find a proxy by name."""
         return self._proxies.get(name)
 
-    def list_proxies(self) -> list[ProxyInstance]:
+    def list_proxies(self) -> list[ProxyInstance | UdpProxyInstance]:
         """Return list of all registered proxies."""
         return list(self._proxies.values())
 

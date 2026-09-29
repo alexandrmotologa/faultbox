@@ -182,3 +182,60 @@ async def test_api_database_toxics_workflow(proxy_manager: ProxyManager) -> None
         assert r_data["attributes"]["error_type"] == "READONLY"
         assert r_data["attributes"]["match_command"] == "SET"
 
+
+@pytest.mark.asyncio
+async def test_api_udp_proxy_and_packet_toxics(proxy_manager: ProxyManager) -> None:
+    app = create_app(proxy_manager)
+    transport = httpx.ASGITransport(app=app)  # type: ignore[arg-type]
+
+    async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+        # 1. Create UDP Proxy
+        resp = await client.post(
+            "/proxies",
+            json={
+                "name": "dns-udp-proxy",
+                "listen": "127.0.0.1:15353",
+                "upstream": "127.0.0.1:53",
+                "protocol": "udp",
+            },
+        )
+        assert resp.status_code == 201
+        p_data = resp.json()
+        assert p_data["name"] == "dns-udp-proxy"
+        assert p_data["protocol"] == "udp"
+
+        # 2. Add packet_drop toxic
+        resp = await client.post(
+            "/proxies/dns-udp-proxy/toxics",
+            json={
+                "name": "drop-packet",
+                "type": "packet_drop",
+                "direction": "inbound",
+                "toxicity": 1.0,
+                "attributes": {"drop_rate": 0.4, "consecutive": 2},
+            },
+        )
+        assert resp.status_code == 201
+        t_data = resp.json()
+        assert t_data["type"] == "packet_drop"
+        assert t_data["attributes"]["drop_rate"] == 0.4
+        assert t_data["attributes"]["consecutive"] == 2
+
+        # 3. Add packet_duplicate toxic
+        resp = await client.post(
+            "/proxies/dns-udp-proxy/toxics",
+            json={
+                "name": "dup-packet",
+                "type": "packet_duplicate",
+                "direction": "both",
+                "toxicity": 1.0,
+                "attributes": {"count": 2, "delay_ms": 5.0},
+            },
+        )
+        assert resp.status_code == 201
+        d_data = resp.json()
+        assert d_data["type"] == "packet_duplicate"
+        assert d_data["attributes"]["count"] == 2
+        assert d_data["attributes"]["delay_ms"] == 5.0
+
+

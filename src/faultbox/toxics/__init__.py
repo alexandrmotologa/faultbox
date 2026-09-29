@@ -8,6 +8,9 @@ from faultbox.toxics.flapping import FlappingToxic
 from faultbox.toxics.grpc_fault import GrpcFaultToxic
 from faultbox.toxics.http_error import HttpErrorToxic
 from faultbox.toxics.latency import LatencyToxic
+from faultbox.toxics.packet_drop import PacketDropToxic
+from faultbox.toxics.packet_duplicate import PacketDuplicateToxic
+from faultbox.toxics.packet_reorder import PacketReorderToxic
 from faultbox.toxics.postgres_fault import PostgresFaultToxic
 from faultbox.toxics.redis_fault import RedisFaultToxic
 from faultbox.toxics.reset_peer import ResetPeerToxic
@@ -25,6 +28,9 @@ __all__ = [
     "GrpcFaultToxic",
     "HttpErrorToxic",
     "LatencyToxic",
+    "PacketDropToxic",
+    "PacketDuplicateToxic",
+    "PacketReorderToxic",
     "PostgresFaultToxic",
     "RedisFaultToxic",
     "ResetPeerToxic",

@@ -304,6 +304,10 @@ def get_ui_html() -> str:
     /* Database category */
     .toxic-postgres_fault { background: rgba(59, 130, 246, 0.12); border: 1px solid rgba(59, 130, 246, 0.3); color: #60a5fa; }
     .toxic-redis_fault { background: var(--red-dim); border: 1px solid rgba(239, 68, 68, 0.3); color: #f87171; }
+    /* UDP & Datagram category */
+    .toxic-packet_drop { background: var(--red-dim); border: 1px solid rgba(239, 68, 68, 0.3); color: #f87171; }
+    .toxic-packet_duplicate { background: var(--cyan-dim); border: 1px solid rgba(6, 182, 212, 0.3); color: #22d3ee; }
+    .toxic-packet_reorder { background: var(--yellow-dim); border: 1px solid rgba(234, 179, 8, 0.3); color: #fde047; }
     /* Behavioral category */
     .toxic-flapping { background: var(--orange-dim); border: 1px solid rgba(249,115,22,0.25); color: var(--orange); }
 
@@ -663,10 +667,20 @@ def get_ui_html() -> str:
   <div class="modal-overlay" id="modal-proxy">
     <div class="modal">
       <div class="modal-title">Create New Proxy Route</div>
-      <div class="form-group">
-        <label>Proxy Name</label>
-        <input type="text" id="new-proxy-name" placeholder="order-db">
-        <div class="form-hint">Unique identifier for this proxy route</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Proxy Name</label>
+          <input type="text" id="new-proxy-name" placeholder="order-db">
+          <div class="form-hint">Unique identifier for this proxy route</div>
+        </div>
+        <div class="form-group">
+          <label>Protocol</label>
+          <select id="new-proxy-protocol">
+            <option value="tcp">TCP (Stream)</option>
+            <option value="udp">UDP (Datagram)</option>
+          </select>
+          <div class="form-hint">Transport network layer protocol</div>
+        </div>
       </div>
       <div class="form-row">
         <div class="form-group">
@@ -722,6 +736,11 @@ def get_ui_html() -> str:
             <optgroup label="Database Faults">
               <option value="postgres_fault">PostgreSQL Wire Fault</option>
               <option value="redis_fault">Redis RESP Fault</option>
+            </optgroup>
+            <optgroup label="UDP &amp; Datagram Faults">
+              <option value="packet_drop">Packet Drop (Loss)</option>
+              <option value="packet_duplicate">Packet Duplicate</option>
+              <option value="packet_reorder">Packet Reorder (Jitter)</option>
             </optgroup>
           </select>
         </div>
@@ -863,6 +882,19 @@ def get_ui_html() -> str:
         ]},
         { key: 'message', label: 'Custom Message (Optional)', type: 'text', value: '' },
         { key: 'match_command', label: 'Match Command (Optional, e.g. SET, HSET)', type: 'text', value: '' }
+      ],
+      packet_drop: [
+        { key: 'drop_rate', label: 'Drop Rate (0-1)', type: 'number', value: 0.25, min: 0, max: 1, step: 0.05 },
+        { key: 'consecutive', label: 'Consecutive Burst Drop Count', type: 'number', value: 1, min: 1, step: 1 }
+      ],
+      packet_duplicate: [
+        { key: 'count', label: 'Duplicate Count', type: 'number', value: 1, min: 1, step: 1 },
+        { key: 'delay_ms', label: 'Duplicate Delay (ms)', type: 'number', value: 0, min: 0, step: 5 }
+      ],
+      packet_reorder: [
+        { key: 'delay_ms', label: 'Delay (ms)', type: 'number', value: 50, min: 0, step: 5 },
+        { key: 'jitter_ms', label: 'Jitter (ms)', type: 'number', value: 10, min: 0, step: 1 },
+        { key: 'reorder_ratio', label: 'Reorder Ratio (0-1)', type: 'number', value: 0.5, min: 0, max: 1, step: 0.05 }
       ]
     };
 
@@ -1077,8 +1109,13 @@ def get_ui_html() -> str:
           const resetIcon = '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 16 16"><path d="M2.5 8a5.5 5.5 0 101.6-3.9L2 6.5M2 2.5v4h4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
           const deleteIcon = '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 16 16"><path d="M2.5 4.5h11M5.5 4.5V3a1.5 1.5 0 011.5-1.5h2A1.5 1.5 0 0110.5 3v1.5m2 0v9a1.5 1.5 0 01-1.5 1.5h-6A1.5 1.5 0 013.5 13.5v-9" stroke-linecap="round"/></svg>';
 
+          const proto = (p.protocol || 'tcp').toLowerCase();
+          const protoBadge = proto === 'udp'
+            ? '<span class="badge badge-purple" style="margin-left:6px;font-size:10px;padding:2px 5px;">UDP</span>'
+            : '<span class="badge badge-cyan" style="margin-left:6px;font-size:10px;padding:2px 5px;">TCP</span>';
+
           return '<tr>'
-            + '<td style="font-weight:600;color:var(--text-bright)">' + p.name + '</td>'
+            + '<td style="font-weight:600;color:var(--text-bright)">' + p.name + protoBadge + '</td>'
             + '<td><code>' + p.listen + '</code></td>'
             + '<td><code>' + p.upstream + '</code></td>'
             + '<td>' + statusBadge + '</td>'
@@ -1176,20 +1213,21 @@ def get_ui_html() -> str:
       const name = document.getElementById('new-proxy-name').value.trim();
       const listen = document.getElementById('new-proxy-listen').value.trim();
       const upstream = document.getElementById('new-proxy-upstream').value.trim();
+      const protocol = document.getElementById('new-proxy-protocol').value;
       if (!name || !listen || !upstream) { toast('Please fill in all fields', 'error'); return; }
 
       try {
         const res = await fetch('/proxies', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, listen, upstream })
+          body: JSON.stringify({ name, listen, upstream, protocol })
         });
         if (res.ok) {
           closeModal('modal-proxy');
           document.getElementById('new-proxy-name').value = '';
           document.getElementById('new-proxy-listen').value = '';
           document.getElementById('new-proxy-upstream').value = '';
-          toast('Proxy "' + name + '" created');
+          toast('Proxy "' + name + '" (' + protocol.toUpperCase() + ') created');
           fetchProxies();
         } else {
           const err = await res.json();

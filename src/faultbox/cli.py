@@ -161,6 +161,7 @@ def list_proxies_cmd(
 
         table = Table(title="FaultBox Active Proxies", border_style="cyan")
         table.add_column("Name", style="bold cyan")
+        table.add_column("Proto", justify="center", style="magenta")
         table.add_column("Listen", style="white")
         table.add_column("Upstream", style="white")
         table.add_column("Status", justify="center")
@@ -171,8 +172,10 @@ def list_proxies_cmd(
         for p in proxies:
             status_text = "[green]ACTIVE[/green]" if p["enabled"] else "[yellow]PAUSED[/yellow]"
             toxics_str = ", ".join(t["name"] for t in p.get("toxics", [])) or "[dim]None[/dim]"
+            proto_text = p.get("protocol", "tcp").upper()
             table.add_row(
                 p["name"],
+                proto_text,
                 p["listen"],
                 p["upstream"],
                 status_text,
@@ -190,6 +193,9 @@ def create_proxy_cmd(
     name: Annotated[str, typer.Argument(help="Unique proxy name.")],
     listen: Annotated[str, typer.Argument(help="Listen port or host:port.")],
     upstream: Annotated[str, typer.Argument(help="Upstream host:port.")],
+    protocol: Annotated[
+        str, typer.Option("--protocol", "-p", help="Proxy protocol: tcp or udp.")
+    ] = "tcp",
     api_url: Annotated[
         str, typer.Option("--api-url", help="FaultBox API base URL.")
     ] = "http://127.0.0.1:8474",
@@ -198,11 +204,11 @@ def create_proxy_cmd(
     try:
         resp = httpx.post(
             f"{api_url}/proxies",
-            json={"name": name, "listen": listen, "upstream": upstream},
+            json={"name": name, "listen": listen, "upstream": upstream, "protocol": protocol},
             timeout=5.0,
         )
         resp.raise_for_status()
-        console.print(f"[bold green]Proxy '{name}' created successfully.[/bold green]")
+        console.print(f"[bold green]Proxy '{name}' ({protocol.upper()}) created successfully.[/bold green]")
     except httpx.HTTPStatusError as exc:
         console.print(
             f"[bold red]Error ({exc.response.status_code}):[/bold red] {exc.response.text}"

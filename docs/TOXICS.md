@@ -272,5 +272,60 @@ Intercepts Redis protocol streams and injects synthetic RESP simple error frames
 faultbox toxic add redis-proxy failover --type redis_fault --direction outbound --attributes '{"error_type": "READONLY", "match_command": "SET"}'
 ```
 
+---
 
+## 14. Packet Drop (`packet_drop`)
 
+Simulates UDP and datagram packet loss, including single-packet drops and consecutive burst drop events.
+
+### Attributes
+
+| Attribute | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `drop_rate` | float | `0.2` | Probability of dropping a packet (`0.0` to `1.0`) |
+| `consecutive` | integer | `1` | Number of consecutive packets to drop when triggered (burst packet loss) |
+
+### Example
+
+```bash
+faultbox toxic add dns-proxy burst-loss --type packet_drop --direction inbound --attributes '{"drop_rate": 0.3, "consecutive": 3}'
+```
+
+---
+
+## 15. Packet Duplicate (`packet_duplicate`)
+
+Simulates duplicate datagram delivery where a single transmitted UDP packet is received multiple times by the target.
+
+### Attributes
+
+| Attribute | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `count` | integer | `1` | Number of duplicate copies emitted (e.g. 1 creates 1 original + 1 duplicate = 2 packets) |
+| `delay_ms` | float | `0.0` | Milliseconds delay before duplicate packets are transmitted |
+
+### Example
+
+```bash
+faultbox toxic add quic-proxy dup --type packet_duplicate --direction both --attributes '{"count": 2, "delay_ms": 10.0}'
+```
+
+---
+
+## 16. Packet Reorder (`packet_reorder`)
+
+Simulates out-of-order datagram delivery by applying differential latency and jitter across packets in a datagram stream.
+
+### Attributes
+
+| Attribute | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `delay_ms` | float | `50.0` | Base delay applied to delayed packets |
+| `jitter_ms` | float | `10.0` | Randomized jitter added or subtracted from delay |
+| `reorder_ratio` | float | `0.5` | Fraction of packets subjected to reordering delay (`0.0` to `1.0`) |
+
+### Example
+
+```bash
+faultbox toxic add game-proxy reorder --type packet_reorder --direction outbound --attributes '{"delay_ms": 75.0, "jitter_ms": 15.0, "reorder_ratio": 0.4}'
+```

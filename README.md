@@ -44,6 +44,11 @@ FaultBox runs as a standalone process or Docker container. You point your applic
   - TLS Fault: simulates SSL handshake failures, bad certificates, and TLS alert records.
   - PostgreSQL Fault: injects wire-level ErrorResponse frames (admin_shutdown, serialization_failure, query_canceled).
   - Redis Fault: injects RESP protocol errors (READONLY, BUSY, LOADING, CLUSTERDOWN, OOM).
+  - Packet Drop: simulates UDP datagram packet loss and burst loss.
+  - Packet Duplicate: delivers duplicate datagram copies with optional delay.
+  - Packet Reorder: introduces differential packet arrival jitter causing out-of-order delivery.
+- TCP and UDP/Datagram Proxies: full connectionless datagram proxying with automatic session tracking for DNS, QUIC, VoIP, and WebSockets.
+- Quality Gates & SLA Assertions: evaluate automated resilience thresholds in YAML scenarios and fail CI/CD with non-zero exit codes.
 - Python Client SDK & Pytest Plugin: programmatic chaos injection with scoped context managers (`with client.toxic(...)`).
 - REST control plane: manage proxies, toxics, and metrics at runtime via HTTP endpoints.
 - Web UI Dashboard: single-page browser interface with live WebSocket telemetry, sparkline charts, dynamic toxic configuration forms, and full mobile responsiveness at `http://127.0.0.1:8474/`.

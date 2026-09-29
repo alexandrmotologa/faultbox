@@ -17,12 +17,16 @@ class ProxyCreateRequest(BaseModel):
     upstream: str = Field(
         ..., description="Upstream destination address", examples=["127.0.0.1:6379"]
     )
+    protocol: str = Field(
+        "tcp", description="Network protocol: tcp or udp", examples=["tcp", "udp"]
+    )
 
 
 class ProxyResponse(BaseModel):
     """Proxy details including active toxics and traffic counters."""
 
     name: str
+    protocol: str = "tcp"
     listen: str
     upstream: str
     enabled: bool

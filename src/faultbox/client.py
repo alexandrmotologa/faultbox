@@ -49,11 +49,17 @@ class FaultBoxClient:
         resp.raise_for_status()
         return resp.json()
 
-    def create_proxy(self, name: str, listen: str, upstream: str) -> dict[str, Any]:
+    def create_proxy(
+        self,
+        name: str,
+        listen: str,
+        upstream: str,
+        protocol: str = "tcp",
+    ) -> dict[str, Any]:
         """Create and start a new proxy route."""
         resp = self._client.post(
             "/proxies",
-            json={"name": name, "listen": listen, "upstream": upstream},
+            json={"name": name, "listen": listen, "upstream": upstream, "protocol": protocol},
         )
         resp.raise_for_status()
         return resp.json()
@@ -162,9 +168,10 @@ class FaultBoxClient:
         name: str,
         listen: str,
         upstream: str,
+        protocol: str = "tcp",
     ) -> Generator[dict[str, Any], None, None]:
         """Context manager that creates an ephemeral proxy and deletes it on exit."""
-        proxy = self.create_proxy(name, listen, upstream)
+        proxy = self.create_proxy(name, listen, upstream, protocol=protocol)
         try:
             yield proxy
         finally:
@@ -225,11 +232,17 @@ class AsyncFaultBoxClient:
         resp.raise_for_status()
         return resp.json()
 
-    async def create_proxy(self, name: str, listen: str, upstream: str) -> dict[str, Any]:
+    async def create_proxy(
+        self,
+        name: str,
+        listen: str,
+        upstream: str,
+        protocol: str = "tcp",
+    ) -> dict[str, Any]:
         """Create and start a new proxy route."""
         resp = await self._client.post(
             "/proxies",
-            json={"name": name, "listen": listen, "upstream": upstream},
+            json={"name": name, "listen": listen, "upstream": upstream, "protocol": protocol},
         )
         resp.raise_for_status()
         return resp.json()
@@ -333,9 +346,10 @@ class AsyncFaultBoxClient:
         name: str,
         listen: str,
         upstream: str,
+        protocol: str = "tcp",
     ) -> AsyncGenerator[dict[str, Any], None]:
         """Asynchronous context manager creating an ephemeral proxy and removing it on exit."""
-        proxy = await self.create_proxy(name, listen, upstream)
+        proxy = await self.create_proxy(name, listen, upstream, protocol=protocol)
         try:
             yield proxy
         finally:

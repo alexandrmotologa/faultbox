@@ -66,6 +66,7 @@ def create_router(manager: ProxyManager) -> APIRouter:
                 name=payload.name,
                 listen=payload.listen,
                 upstream=payload.upstream,
+                protocol=payload.protocol,
             )
             return instance.to_dict()
         except ValueError as exc:
