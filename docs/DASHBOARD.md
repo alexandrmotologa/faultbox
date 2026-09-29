@@ -70,6 +70,10 @@ Click **Run Scenario** in the header to launch the interactive Chaos Scenario Ru
 - **Real-Time Execution Report**: Watch phases execute with time offsets, target proxies, and action status.
 - **Quality Gate Assertions**: Review live pass/fail evaluation of system error budgets and throughput metrics.
 
+<p align="center">
+  <img src="images/dashboard-scenario-runner.png" alt="FaultBox Visual Scenario Runner Modal" width="750" />
+</p>
+
 ### 6. Cluster Topology Export & Import
 - **Export Topology**: Download the entire active proxy and toxic configuration snapshot as `faultbox-topology.json` with a single click.
 - **Import Topology**: Upload or paste a saved topology JSON to instantly restore or replicate complex multi-service chaos environments.

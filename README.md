@@ -15,7 +15,7 @@
 </p>
 
 <p align="center">
-  <img src="docs/images/dashboard-overview.png" alt="FaultBox Real-Time Web Dashboard" width="880" />
+  <img src="docs/images/faultbox_demo.gif" alt="FaultBox Animated Demo" width="880" style="border-radius: 10px; box-shadow: 0 8px 30px rgba(0,0,0,0.5);" />
 </p>
 
 FaultBox is a programmable network and protocol chaos injection proxy written in Python 3.12. It sits between client applications and upstream services such as databases, message brokers, and HTTP APIs to simulate network degradation, timeouts, rate limits, data corruption, and protocol errors.
@@ -60,7 +60,10 @@ FaultBox runs as a standalone process or Docker container. You point your applic
 - Production Ecosystem: Kubernetes sidecar patterns (`deploy/k8s-sidecar.yaml`) and Docker Compose chaos stacks (`deploy/docker-compose.chaos.yml`).
 
 <p align="center">
-  <img src="docs/images/dashboard-modal-toxic.png" alt="FaultBox Interactive Toxic Configuration" width="800" />
+  <img src="docs/images/dashboard-scenario-runner.png" alt="FaultBox Visual Scenario Runner" width="840" style="border-radius: 8px; margin-bottom: 12px;" />
+</p>
+<p align="center">
+  <img src="docs/images/dashboard-modal-toxic.png" alt="FaultBox Interactive Toxic Configuration" width="840" style="border-radius: 8px;" />
 </p>
 
 ## Quickstart
