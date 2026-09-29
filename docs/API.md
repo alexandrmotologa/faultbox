@@ -239,3 +239,139 @@ DELETE /proxies/{name}/toxics/{toxic_name}
   "message": "Toxic 'latency-spike' removed."
 }
 ```
+
+---
+
+### Execute Chaos Scenario
+
+```http
+POST /scenarios/run
+```
+
+**Request Body:**
+```json
+{
+  "yaml_content": "name: test-scenario\ntarget_proxy: order-api\nphases:\n  - time_seconds: 0.0\n    action: add_toxic\n    toxic:\n      name: lat\n      type: latency\n      attributes: { latency_ms: 100 }\nassertions:\n  - metric: errors_total\n    operator: '<='\n    threshold: 0\n"
+}
+```
+
+**Response (200 OK):**
+```json
+{
+  "name": "test-scenario",
+  "total_phases": 1,
+  "executed_phases": 1,
+  "duration_seconds": 0.15,
+  "events": [
+    {
+      "timestamp": 1727637000.0,
+      "time_offset": 0.0,
+      "action": "add_toxic",
+      "target_proxy": "order-api",
+      "success": true,
+      "message": "Added toxic 'lat' (latency)"
+    }
+  ],
+  "assertions": [
+    {
+      "metric": "errors_total",
+      "operator": "<=",
+      "threshold": 0.0,
+      "actual_value": 0.0,
+      "passed": true,
+      "target_proxy": "order-api",
+      "description": "",
+      "message": "errors_total actual 0.0 <= threshold 0.0 -> PASS"
+    }
+  ],
+  "assertions_passed": true,
+  "success": true
+}
+```
+
+---
+
+### Export Topology
+
+```http
+GET /topology/export
+```
+
+**Response (200 OK):**
+```json
+{
+  "version": "1.0",
+  "proxies": [
+    {
+      "name": "web-front",
+      "protocol": "tcp",
+      "listen": "0.0.0.0:8080",
+      "upstream": "127.0.0.1:80",
+      "enabled": true,
+      "stats": { ... },
+      "toxics": [ ... ]
+    }
+  ]
+}
+```
+
+---
+
+### Import Topology
+
+```http
+POST /topology/import
+```
+
+**Request Body:**
+```json
+{
+  "proxies": [
+    {
+      "name": "web-front",
+      "protocol": "tcp",
+      "listen": "0.0.0.0:8080",
+      "upstream": "127.0.0.1:80",
+      "enabled": true,
+      "toxics": [
+        {
+          "name": "lat-toxic",
+          "type": "latency",
+          "direction": "both",
+          "toxicity": 1.0,
+          "attributes": { "latency_ms": 100 }
+        }
+      ]
+    }
+  ]
+}
+```
+
+**Response (200 OK):**
+```json
+{
+  "status": "ok",
+  "message": "Successfully imported topology with 1 proxies."
+}
+```
+
+---
+
+### Prometheus Metrics
+
+```http
+GET /metrics
+```
+
+Returns Prometheus standard exposition format metrics for scrapers.
+
+---
+
+### WebSocket Live Telemetry
+
+```http
+WS /ws/telemetry
+```
+
+Streams real-time JSON snapshots of active proxy configurations and traffic statistics every 1.0s to connected browser clients.
+

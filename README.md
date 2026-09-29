@@ -30,7 +30,7 @@ FaultBox runs as a standalone process or Docker container. You point your applic
 
 - Asynchronous TCP proxy built on Python `asyncio`.
 - Bidirectional toxic chains: apply disruptions to incoming client requests, outgoing upstream responses, or both.
-- Thirteen built-in toxic types:
+- Seventeen built-in toxic types across 8 categories:
   - Latency: adds configurable delays with optional jitter.
   - Bandwidth: throttles throughput using a token bucket rate limiter.
   - Reset Peer: abruptly terminates TCP connections with `SO_LINGER` set to 0.
@@ -53,10 +53,11 @@ FaultBox runs as a standalone process or Docker container. You point your applic
 - Quality Gates & SLA Assertions: evaluate automated resilience thresholds in YAML scenarios and fail CI/CD with non-zero exit codes.
 - Python Client SDK & Pytest Plugin: programmatic chaos injection with scoped context managers (`with client.toxic(...)`).
 - REST control plane: manage proxies, toxics, and metrics at runtime via HTTP endpoints.
-- Web UI Dashboard: single-page browser interface with live WebSocket telemetry, sparkline charts, dynamic toxic configuration forms, and full mobile responsiveness at `http://127.0.0.1:8474/`.
+- Web UI Dashboard: single-page browser interface with visual scenario runner, cluster topology export/import, search & filter toolbar, live WebSocket telemetry, sparkline charts, dynamic toxic configuration forms, and full mobile responsiveness at `http://127.0.0.1:8474/`.
 - Terminal dashboard: live terminal interface using Rich to observe traffic and toggle toxics.
 - Prometheus Metrics: native `/metrics` endpoint for Prometheus and Grafana monitoring.
 - Declarative scenarios: automate timed chaos experiments using YAML scenario files in CI/CD pipelines.
+- Production Ecosystem: Kubernetes sidecar patterns (`deploy/k8s-sidecar.yaml`) and Docker Compose chaos stacks (`deploy/docker-compose.chaos.yml`).
 
 <p align="center">
   <img src="docs/images/dashboard-modal-toxic.png" alt="FaultBox Interactive Toxic Configuration" width="800" />

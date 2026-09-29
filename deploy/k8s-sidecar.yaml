@@ -1,0 +1,89 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-service-with-faultbox
+  labels:
+    app: order-service
+    tier: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: order-service
+  template:
+    metadata:
+      labels:
+        app: order-service
+    spec:
+      containers:
+        # Main Application Container
+        - name: order-service
+          image: python:3.12-slim
+          command: ["sh", "-c"]
+          args:
+            - |
+              echo "Order service connecting to local FaultBox sidecar proxy on 127.0.0.1:5432..."
+              # Database connections target localhost:5432 (FaultBox proxy), which forwards to postgres-cluster:5432
+              sleep 3600
+          env:
+            - name: DATABASE_URL
+              value: "postgresql://app_user:secret@127.0.0.1:5432/orders_db"
+            - name: REDIS_URL
+              value: "redis://127.0.0.1:6379/0"
+          resources:
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
+            requests:
+              cpu: "100m"
+              memory: "64Mi"
+
+        # FaultBox Sidecar Container
+        - name: faultbox-sidecar
+          image: ghcr.io/alexandrmotologa/faultbox:latest
+          command: ["faultbox", "server", "--host", "0.0.0.0", "--port", "8474"]
+          ports:
+            # Control Plane REST API & Dashboard
+            - name: control-plane
+              containerPort: 8474
+              protocol: TCP
+            # Proxy Listen Port for PostgreSQL
+            - name: proxy-postgres
+              containerPort: 5432
+              protocol: TCP
+            # Proxy Listen Port for Redis
+            - name: proxy-redis
+              containerPort: 6379
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8474
+            initialDelaySeconds: 3
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8474
+            initialDelaySeconds: 2
+            periodSeconds: 5
+          resources:
+            limits:
+              cpu: "250m"
+              memory: "128Mi"
+            requests:
+              cpu: "50m"
+              memory: "32Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: order-service-faultbox-ui
+spec:
+  type: ClusterIP
+  selector:
+    app: order-service
+  ports:
+    - name: dashboard
+      port: 8474
+      targetPort: 8474

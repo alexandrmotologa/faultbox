@@ -63,7 +63,23 @@ Click **+ Toxic** on any proxy to open the toxic attachment modal:
   <img src="images/dashboard-modal-toxic.png" alt="FaultBox Interactive Toxic Injection Modal" width="750" />
 </p>
 
-### 5. Visual Design & Multi-Device Responsiveness
+### 5. Visual Scenario Runner with SLA Assertions
+Click **Run Scenario** in the header to launch the interactive Chaos Scenario Runner:
+- **Instant Presets**: Select from ready-made presets including *Cascading Failure*, *Flapping Link & Packet Drop*, *Slow 3G Network*, *Distributed Tracing & W3C Baggage*, and *SLA Quality Gate*.
+- **Monospace YAML Editor**: Edit or paste custom declarative chaos scenarios directly in the browser.
+- **Real-Time Execution Report**: Watch phases execute with time offsets, target proxies, and action status.
+- **Quality Gate Assertions**: Review live pass/fail evaluation of system error budgets and throughput metrics.
+
+### 6. Cluster Topology Export & Import
+- **Export Topology**: Download the entire active proxy and toxic configuration snapshot as `faultbox-topology.json` with a single click.
+- **Import Topology**: Upload or paste a saved topology JSON to instantly restore or replicate complex multi-service chaos environments.
+
+### 7. Real-Time Search & Protocol Filtering
+- **Fuzzy Search**: Filter proxies instantly by name, listening address, or upstream destination.
+- **Protocol Pills**: Switch views between `ALL`, `TCP` stream proxies, and `UDP` datagram proxies.
+- **State Pills**: Filter by `Active`, `Paused`, `With Toxics` (dirty), or `Clean` (pristine).
+
+### 8. Visual Design & Multi-Device Responsiveness
 - Premium dark theme with Inter and JetBrains Mono typography.
 - Semantic color-coded toxic badges: yellow for latency, cyan for throughput, red for destructive errors, purple for corruption, orange for behavioral faults.
 - Toast notifications for all operations (replaces browser-native alerts).
@@ -74,3 +90,4 @@ Click **+ Toxic** on any proxy to open the toxic attachment modal:
 <p align="center">
   <img src="images/dashboard-mobile.png" alt="FaultBox Mobile Responsive Dashboard" width="380" />
 </p>
+

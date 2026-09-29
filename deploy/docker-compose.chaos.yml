@@ -1,0 +1,55 @@
+version: "3.8"
+
+services:
+  # FaultBox Control Plane & Dynamic Proxy Server
+  faultbox:
+    image: ghcr.io/alexandrmotologa/faultbox:latest
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    container_name: faultbox-chaos-engine
+    ports:
+      - "8474:8474"   # Web UI Dashboard & REST API
+      - "15432:15432" # PostgreSQL Chaos Proxy
+      - "16379:16379" # Redis Chaos Proxy
+      - "18080:18080" # HTTP Upstream Chaos Proxy
+      - "18053:18053/udp" # UDP DNS Chaos Proxy
+    environment:
+      - FAULTBOX_HOST=0.0.0.0
+      - FAULTBOX_PORT=8474
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8474/healthz"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+
+  # Real Upstream Database: PostgreSQL
+  postgres-upstream:
+    image: postgres:16-alpine
+    container_name: postgres-upstream
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=test_db
+    ports:
+      - "5432:5432"
+
+  # Real Upstream Cache: Redis
+  redis-upstream:
+    image: redis:7-alpine
+    container_name: redis-upstream
+    ports:
+      - "6379:6379"
+
+  # Target Microservice Testing Resiliency
+  resilience-app:
+    image: python:3.12-slim
+    container_name: resilience-app
+    depends_on:
+      - faultbox
+      - postgres-upstream
+      - redis-upstream
+    volumes:
+      - ../examples/python-microservices:/app
+    working_dir: /app
+    command: ["python", "app.py"]

@@ -1,0 +1,41 @@
+name: order-service-resilience-gate
+description: "Simulate database failover, network latency spikes, and verify circuit breaker SLA"
+target_proxy: demo-postgres
+
+phases:
+  - time_seconds: 0.0
+    action: add_toxic
+    toxic:
+      name: baseline-latency
+      type: latency
+      attributes:
+        latency_ms: 50
+        jitter_ms: 10
+
+  - time_seconds: 2.0
+    action: add_toxic
+    toxic:
+      name: pg-failover
+      type: postgres_fault
+      toxicity: 0.5
+      attributes:
+        sqlstate: "57P01"
+        message: "admin_shutdown"
+        severity: "FATAL"
+
+  - time_seconds: 5.0
+    action: remove_toxic
+    toxic_name: pg-failover
+
+  - time_seconds: 6.0
+    action: reset
+
+assertions:
+  - metric: errors_total
+    operator: ">="
+    threshold: 1
+    description: "Verify circuit breaker recorded upstream faults"
+  - metric: bytes_total
+    operator: ">="
+    threshold: 100
+    description: "Verify data was transferred across the proxy"
