@@ -1,6 +1,6 @@
 # Toxic Plugin Reference
 
-Toxics represent chaos rules injected into the data stream between a client and an upstream service. FaultBox includes thirteen built-in toxic types across network, protocol, and database layers.
+Toxics represent chaos rules injected into the data stream between a client and an upstream service. FaultBox includes seventeen built-in toxic types across network, protocol, database, and observability layers.
 
 ## General Configuration
 
@@ -9,7 +9,7 @@ Every toxic accepts four common attributes:
 | Field | Type | Default | Description |
 | :--- | :--- | :--- | :--- |
 | `name` | string | required | Unique identifier within the proxy pipeline |
-| `type` | string | required | Plugin type name (e.g. `latency`, `bandwidth`) |
+| `type` | string | required | Plugin type name (e.g. `latency`, `bandwidth`, `trace_inject`) |
 | `direction` | string | `both` | Target direction: `inbound`, `outbound`, or `both` |
 | `toxicity` | float | `1.0` | Probability of applying the toxic (value between `0.0` and `1.0`) |
 | `enabled` | boolean | `true` | Whether the toxic actively modifies traffic |
@@ -328,4 +328,26 @@ Simulates out-of-order datagram delivery by applying differential latency and ji
 
 ```bash
 faultbox toxic add game-proxy reorder --type packet_reorder --direction outbound --attributes '{"delay_ms": 75.0, "jitter_ms": 15.0, "reorder_ratio": 0.4}'
+```
+
+---
+
+## 17. Trace Context Injection (`trace_inject`)
+
+Injects W3C Trace Context (`traceparent`, `tracestate`, `baggage`), B3 propagation headers, or custom correlation headers into HTTP/gRPC traffic streams. Allows observing and correlating chaos injection events across OpenTelemetry, Jaeger, Datadog, Zipkin, and Prometheus exemplars.
+
+### Attributes
+
+| Attribute | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `mode` | string | `w3c` | Tracing standard: `w3c` (traceparent/baggage), `b3` (X-B3-TraceId), or `custom` |
+| `custom_header` | string | `X-FaultBox-Chaos` | Custom header name when using `mode: custom` |
+| `custom_value` | string | `true` | Custom header value when using `mode: custom` |
+| `baggage_extra` | string | `""` | Extra baggage key-value pairs (e.g. `env=staging,experiment=chaos-1`) |
+| `override_existing` | boolean | `false` | Overwrite incoming trace headers if already present in stream |
+
+### Example
+
+```bash
+faultbox toxic add api-proxy otel-tagger --type trace_inject --direction inbound --attributes '{"mode": "w3c", "baggage_extra": "chaos.tier=staging"}'
 ```

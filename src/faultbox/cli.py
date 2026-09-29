@@ -15,10 +15,13 @@ from rich.table import Table
 from faultbox import __version__
 from faultbox.api.server import start_api_server
 from faultbox.config import FaultBoxConfig
+from faultbox.core.engine import setup_event_loop
 from faultbox.core.proxy import ProxyManager
 from faultbox.scenarios.runner import ScenarioRunner
 from faultbox.scenarios.schema import ScenarioConfig
 from faultbox.tui.app import run_dashboard
+
+setup_event_loop()
 
 app = typer.Typer(
     name="faultbox",

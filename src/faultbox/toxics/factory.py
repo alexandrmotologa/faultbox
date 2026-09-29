@@ -20,6 +20,7 @@ from faultbox.toxics.reset_peer import ResetPeerToxic
 from faultbox.toxics.slicer import SlicerToxic
 from faultbox.toxics.timeout import TimeoutToxic
 from faultbox.toxics.tls_fault import TlsFaultToxic
+from faultbox.toxics.trace_inject import TraceInjectToxic
 from faultbox.toxics.waveform_latency import WaveformLatencyToxic
 
 TOXIC_REGISTRY: dict[str, type[BaseToxic]] = {
@@ -39,6 +40,7 @@ TOXIC_REGISTRY: dict[str, type[BaseToxic]] = {
     "packet_drop": PacketDropToxic,
     "packet_duplicate": PacketDuplicateToxic,
     "packet_reorder": PacketReorderToxic,
+    "trace_inject": TraceInjectToxic,
 }
 
 

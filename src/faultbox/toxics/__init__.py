@@ -17,6 +17,7 @@ from faultbox.toxics.reset_peer import ResetPeerToxic
 from faultbox.toxics.slicer import SlicerToxic
 from faultbox.toxics.timeout import TimeoutToxic
 from faultbox.toxics.tls_fault import TlsFaultToxic
+from faultbox.toxics.trace_inject import TraceInjectToxic
 from faultbox.toxics.waveform_latency import WaveformLatencyToxic
 
 __all__ = [
@@ -39,6 +40,7 @@ __all__ = [
     "TimeoutToxic",
     "TlsFaultToxic",
     "ToxicDirection",
+    "TraceInjectToxic",
     "WaveformLatencyToxic",
     "create_toxic",
 ]

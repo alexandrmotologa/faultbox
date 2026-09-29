@@ -308,6 +308,8 @@ def get_ui_html() -> str:
     .toxic-packet_drop { background: var(--red-dim); border: 1px solid rgba(239, 68, 68, 0.3); color: #f87171; }
     .toxic-packet_duplicate { background: var(--cyan-dim); border: 1px solid rgba(6, 182, 212, 0.3); color: #22d3ee; }
     .toxic-packet_reorder { background: var(--yellow-dim); border: 1px solid rgba(234, 179, 8, 0.3); color: #fde047; }
+    /* Observability & Tracing category */
+    .toxic-trace_inject { background: rgba(14, 165, 233, 0.12); border: 1px solid rgba(14, 165, 233, 0.3); color: #38bdf8; }
     /* Behavioral category */
     .toxic-flapping { background: var(--orange-dim); border: 1px solid rgba(249,115,22,0.25); color: var(--orange); }
 
@@ -742,6 +744,9 @@ def get_ui_html() -> str:
               <option value="packet_duplicate">Packet Duplicate</option>
               <option value="packet_reorder">Packet Reorder (Jitter)</option>
             </optgroup>
+            <optgroup label="Distributed Tracing">
+              <option value="trace_inject">W3C Trace Context (traceparent)</option>
+            </optgroup>
           </select>
         </div>
         <div class="form-group">
@@ -895,6 +900,16 @@ def get_ui_html() -> str:
         { key: 'delay_ms', label: 'Delay (ms)', type: 'number', value: 50, min: 0, step: 5 },
         { key: 'jitter_ms', label: 'Jitter (ms)', type: 'number', value: 10, min: 0, step: 1 },
         { key: 'reorder_ratio', label: 'Reorder Ratio (0-1)', type: 'number', value: 0.5, min: 0, max: 1, step: 0.05 }
+      ],
+      trace_inject: [
+        { key: 'mode', label: 'Tracing Standard', type: 'select', value: 'w3c', options: [
+          { v: 'w3c', l: 'W3C Trace Context (traceparent, tracestate, baggage)' },
+          { v: 'b3', l: 'B3 Propagation (X-B3-TraceId, X-B3-SpanId)' },
+          { v: 'custom', l: 'Custom Header' }
+        ]},
+        { key: 'custom_header', label: 'Custom Header Name', type: 'text', value: 'X-FaultBox-Chaos' },
+        { key: 'custom_value', label: 'Custom Header Value', type: 'text', value: 'true' },
+        { key: 'baggage_extra', label: 'Extra Baggage (Optional)', type: 'text', value: 'faultbox.env=test' }
       ]
     };
 

@@ -238,4 +238,21 @@ async def test_api_udp_proxy_and_packet_toxics(proxy_manager: ProxyManager) -> N
         assert d_data["attributes"]["count"] == 2
         assert d_data["attributes"]["delay_ms"] == 5.0
 
+        # 4. Add trace_inject toxic
+        resp = await client.post(
+            "/proxies/dns-udp-proxy/toxics",
+            json={
+                "name": "trace-w3c",
+                "type": "trace_inject",
+                "direction": "inbound",
+                "toxicity": 1.0,
+                "attributes": {"mode": "w3c", "baggage_extra": "env=test"},
+            },
+        )
+        assert resp.status_code == 201
+        tr_data = resp.json()
+        assert tr_data["type"] == "trace_inject"
+        assert tr_data["attributes"]["mode"] == "w3c"
+
+
 

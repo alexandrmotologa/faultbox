@@ -47,6 +47,8 @@ FaultBox runs as a standalone process or Docker container. You point your applic
   - Packet Drop: simulates UDP datagram packet loss and burst loss.
   - Packet Duplicate: delivers duplicate datagram copies with optional delay.
   - Packet Reorder: introduces differential packet arrival jitter causing out-of-order delivery.
+  - Trace Context Injection: injects W3C `traceparent`, `tracestate`, and OpenTelemetry baggage headers for end-to-end distributed tracing correlation in Jaeger, Datadog, and Zipkin.
+- High-Performance Async Engine: powered by `uvloop` (libuv) on POSIX platforms and non-blocking `asyncio` streams capable of handling 100k+ req/sec with zero byte corruption.
 - TCP and UDP/Datagram Proxies: full connectionless datagram proxying with automatic session tracking for DNS, QUIC, VoIP, and WebSockets.
 - Quality Gates & SLA Assertions: evaluate automated resilience thresholds in YAML scenarios and fail CI/CD with non-zero exit codes.
 - Python Client SDK & Pytest Plugin: programmatic chaos injection with scoped context managers (`with client.toxic(...)`).
