@@ -6,6 +6,8 @@ import pytest
 
 from faultbox.toxics import (
     GrpcFaultToxic,
+    PostgresFaultToxic,
+    RedisFaultToxic,
     StreamContext,
     TlsFaultToxic,
     ToxicDirection,
@@ -94,3 +96,108 @@ def test_protocol_factory_registration() -> None:
     tls = create_toxic("t1", "tls_fault", attributes={"mode": "alert_bad_certificate"})
     assert isinstance(tls, TlsFaultToxic)
     assert tls.mode == "alert_bad_certificate"
+
+
+@pytest.mark.asyncio
+async def test_postgres_fault_admin_shutdown(outbound_context: StreamContext) -> None:
+    toxic = PostgresFaultToxic(
+        name="pg_kill",
+        sqlstate="57P01",
+        message="terminating connection due to administrator command",
+        close_connection=True,
+    )
+    res = await toxic.transform(b"dummy_query_response", outbound_context)
+    assert res is not None
+    # Must start with ErrorResponse identifier 'E'
+    assert res[0] == ord(b"E")
+    # Must contain SQLSTATE 57P01
+    assert b"C57P01\x00" in res
+    assert b"Mterminating connection due to administrator command\x00" in res
+    assert b"SERROR\x00" in res
+
+    # Trailing responses should be suppressed when close_connection is True
+    trailing = await toxic.transform(b"extra", outbound_context)
+    assert trailing is None
+
+
+@pytest.mark.asyncio
+async def test_postgres_fault_with_ready_for_query(outbound_context: StreamContext) -> None:
+    toxic = PostgresFaultToxic(
+        name="pg_deadlock",
+        sqlstate="40001",
+        send_ready_for_query=True,
+    )
+    res = await toxic.transform(b"dummy", outbound_context)
+    assert res is not None
+    assert b"C40001\x00" in res
+    # Should end with ReadyForQuery packet: 'Z' + len(5) + 'E'
+    assert res.endswith(b"Z\x00\x00\x00\x05E")
+
+
+@pytest.mark.asyncio
+async def test_postgres_fault_query_matching() -> None:
+    in_ctx = StreamContext(proxy_name="pg", direction=ToxicDirection.INBOUND)
+    out_ctx = StreamContext(proxy_name="pg", direction=ToxicDirection.OUTBOUND)
+
+    toxic = PostgresFaultToxic(name="pg_match", match_query="SELECT * FROM orders")
+
+    # Inbound non-matching query
+    await toxic.transform(b"Q\x00\x00\x00\x12SELECT 1;\x00", in_ctx)
+    res1 = await toxic.transform(b"original_resp", out_ctx)
+    assert res1 == b"original_resp"
+
+    # Inbound matching query
+    await toxic.transform(b"Q\x00\x00\x00\x22SELECT * FROM orders WHERE id=1;\x00", in_ctx)
+    res2 = await toxic.transform(b"original_resp", out_ctx)
+    assert res2 is not None
+    assert res2[0] == ord(b"E")
+    assert b"C57P01\x00" in res2
+
+
+@pytest.mark.asyncio
+async def test_redis_fault_readonly(outbound_context: StreamContext) -> None:
+    toxic = RedisFaultToxic(name="r_ro", error_type="READONLY")
+    res = await toxic.transform(b"+OK\r\n", outbound_context)
+    assert res is not None
+    assert res.startswith(b"-READONLY ")
+    assert res.endswith(b"\r\n")
+
+
+@pytest.mark.asyncio
+async def test_redis_fault_clusterdown(outbound_context: StreamContext) -> None:
+    toxic = RedisFaultToxic(
+        name="r_cluster",
+        error_type="CLUSTERDOWN",
+        message="The cluster is down for maintenance",
+    )
+    res = await toxic.transform(b":1\r\n", outbound_context)
+    assert res == b"-CLUSTERDOWN The cluster is down for maintenance\r\n"
+
+
+@pytest.mark.asyncio
+async def test_redis_fault_command_matching() -> None:
+    in_ctx = StreamContext(proxy_name="redis", direction=ToxicDirection.INBOUND)
+    out_ctx = StreamContext(proxy_name="redis", direction=ToxicDirection.OUTBOUND)
+
+    toxic = RedisFaultToxic(name="r_cmd", error_type="BUSY", match_command="SET")
+
+    # Non-matching command (GET key)
+    await toxic.transform(b"*2\r\n$3\r\nGET\r\n$3\r\nfoo\r\n", in_ctx)
+    res1 = await toxic.transform(b"$3\r\nbar\r\n", out_ctx)
+    assert res1 == b"$3\r\nbar\r\n"
+
+    # Matching command (SET key val)
+    await toxic.transform(b"*3\r\n$3\r\nSET\r\n$3\r\nfoo\r\n$3\r\nbar\r\n", in_ctx)
+    res2 = await toxic.transform(b"+OK\r\n", out_ctx)
+    assert res2 is not None
+    assert res2.startswith(b"-BUSY ")
+
+
+def test_database_faults_factory_registration() -> None:
+    pg = create_toxic("pg1", "postgres_fault", attributes={"sqlstate": "40001"})
+    assert isinstance(pg, PostgresFaultToxic)
+    assert pg.sqlstate == "40001"
+
+    r = create_toxic("r1", "redis_fault", attributes={"error_type": "LOADING"})
+    assert isinstance(r, RedisFaultToxic)
+    assert r.error_type == "LOADING"

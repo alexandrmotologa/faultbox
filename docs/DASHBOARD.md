@@ -46,12 +46,13 @@ The dashboard establishes a WebSocket connection to `/ws/telemetry` upon loading
 
 ### 4. Direct Toxic Injection with Dynamic Forms
 Click **+ Toxic** on any proxy to open the toxic attachment modal:
-- Choose from all eleven toxic plugins, organized by category:
+- Choose from all thirteen toxic plugins, organized by category:
   - **Latency & Delay**: Latency, Waveform Latency
   - **Throughput & Throttling**: Bandwidth Throttle, Timeout / Hang
   - **Connection Disruption**: Reset Peer (TCP RST), Flapping Connection
   - **Data Corruption**: Byte Corruption, Packet Slicer
   - **Protocol Errors**: HTTP Error Status, gRPC Fault, TLS / SSL Fault
+  - **Database Faults**: PostgreSQL Wire Fault, Redis RESP Fault
 - Configure target direction (`inbound`, `outbound`, or `both`).
 - Adjust toxicity probability with an interactive slider (0% to 100%).
 - Dynamic form fields generated per toxic type with intuitive controls (number inputs, dropdowns, text fields) instead of raw JSON editing.

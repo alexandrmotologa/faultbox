@@ -301,6 +301,9 @@ def get_ui_html() -> str:
     .toxic-corrupt { background: var(--purple-dim); border: 1px solid rgba(168,85,247,0.25); color: var(--purple); }
     .toxic-slicer { background: var(--purple-dim); border: 1px solid rgba(168,85,247,0.25); color: var(--purple); }
     .toxic-tls_fault { background: var(--purple-dim); border: 1px solid rgba(168,85,247,0.25); color: var(--purple); }
+    /* Database category */
+    .toxic-postgres_fault { background: rgba(59, 130, 246, 0.12); border: 1px solid rgba(59, 130, 246, 0.3); color: #60a5fa; }
+    .toxic-redis_fault { background: var(--red-dim); border: 1px solid rgba(239, 68, 68, 0.3); color: #f87171; }
     /* Behavioral category */
     .toxic-flapping { background: var(--orange-dim); border: 1px solid rgba(249,115,22,0.25); color: var(--orange); }
 
@@ -716,6 +719,10 @@ def get_ui_html() -> str:
               <option value="grpc_fault">gRPC Fault</option>
               <option value="tls_fault">TLS / SSL Fault</option>
             </optgroup>
+            <optgroup label="Database Faults">
+              <option value="postgres_fault">PostgreSQL Wire Fault</option>
+              <option value="redis_fault">Redis RESP Fault</option>
+            </optgroup>
           </select>
         </div>
         <div class="form-group">
@@ -828,6 +835,34 @@ def get_ui_html() -> str:
           'alert_handshake_failure', 'alert_bad_certificate', 'alert_access_denied', 'stall_handshake', 'corrupt_handshake'
         ]},
         { key: 'stall_seconds', label: 'Stall Duration (sec)', type: 'number', value: 30.0, min: 0.1, step: 0.1 }
+      ],
+      postgres_fault: [
+        { key: 'sqlstate', label: 'SQLSTATE Code', type: 'select', value: '57P01', options: [
+          { v: '57P01', l: '57P01 - admin_shutdown (Server closing / failover)' },
+          { v: '40001', l: '40001 - serialization_failure (Deadlock / concurrency conflict)' },
+          { v: '57014', l: '57014 - query_canceled (Statement timeout)' },
+          { v: '08006', l: '08006 - connection_failure' },
+          { v: '23505', l: '23505 - unique_violation' },
+          { v: '42P01', l: '42P01 - undefined_table' },
+          { v: '53300', l: '53300 - too_many_connections' }
+        ]},
+        { key: 'message', label: 'Custom Message (Optional)', type: 'text', value: '' },
+        { key: 'severity', label: 'Severity', type: 'select', value: 'ERROR', options: ['ERROR', 'FATAL', 'PANIC'] },
+        { key: 'match_query', label: 'Match Query Substring (Optional)', type: 'text', value: '' },
+        { key: 'detail', label: 'Detail (Optional)', type: 'text', value: 'FaultBox synthetic chaos injected' }
+      ],
+      redis_fault: [
+        { key: 'error_type', label: 'RESP Error Type', type: 'select', value: 'READONLY', options: [
+          { v: 'READONLY', l: 'READONLY (You cannot write against a replica)' },
+          { v: 'BUSY', l: 'BUSY (Redis is busy running a script)' },
+          { v: 'LOADING', l: 'LOADING (Redis is loading dataset into memory)' },
+          { v: 'CLUSTERDOWN', l: 'CLUSTERDOWN (The cluster is down)' },
+          { v: 'OOM', l: 'OOM (Used memory > maxmemory)' },
+          { v: 'WRONGTYPE', l: 'WRONGTYPE (Operation against wrong key type)' },
+          { v: 'ERR', l: 'ERR (Custom generic error)' }
+        ]},
+        { key: 'message', label: 'Custom Message (Optional)', type: 'text', value: '' },
+        { key: 'match_command', label: 'Match Command (Optional, e.g. SET, HSET)', type: 'text', value: '' }
       ]
     };
 

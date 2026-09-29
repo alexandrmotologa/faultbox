@@ -124,3 +124,61 @@ async def test_api_error_handling(proxy_manager: ProxyManager) -> None:
             json={"name": "p1", "listen": "127.0.0.1:19002", "upstream": "127.0.0.1:80"},
         )
         assert resp.status_code == 400
+
+
+@pytest.mark.asyncio
+async def test_api_database_toxics_workflow(proxy_manager: ProxyManager) -> None:
+    app = create_app(proxy_manager)
+    transport = httpx.ASGITransport(app=app)  # type: ignore[arg-type]
+
+    async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+        # Create proxy
+        resp = await client.post(
+            "/proxies",
+            json={"name": "pg-proxy", "listen": "127.0.0.1:15432", "upstream": "127.0.0.1:5432"},
+        )
+        assert resp.status_code == 201
+
+        # Add postgres_fault toxic
+        resp = await client.post(
+            "/proxies/pg-proxy/toxics",
+            json={
+                "name": "pg-deadlock",
+                "type": "postgres_fault",
+                "direction": "outbound",
+                "toxicity": 1.0,
+                "attributes": {
+                    "sqlstate": "40001",
+                    "severity": "ERROR",
+                    "detail": "synthetic test deadlock",
+                },
+            },
+        )
+        assert resp.status_code == 201
+        data = resp.json()
+        assert data["name"] == "pg-deadlock"
+        assert data["type"] == "postgres_fault"
+        assert data["attributes"]["sqlstate"] == "40001"
+        assert data["attributes"]["sqlstate_name"] == "serialization_failure"
+
+        # Add redis_fault toxic
+        resp = await client.post(
+            "/proxies/pg-proxy/toxics",
+            json={
+                "name": "redis-ro",
+                "type": "redis_fault",
+                "direction": "outbound",
+                "toxicity": 1.0,
+                "attributes": {
+                    "error_type": "READONLY",
+                    "match_command": "SET",
+                },
+            },
+        )
+        assert resp.status_code == 201
+        r_data = resp.json()
+        assert r_data["name"] == "redis-ro"
+        assert r_data["type"] == "redis_fault"
+        assert r_data["attributes"]["error_type"] == "READONLY"
+        assert r_data["attributes"]["match_command"] == "SET"
+

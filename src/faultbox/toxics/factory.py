@@ -11,6 +11,8 @@ from faultbox.toxics.flapping import FlappingToxic
 from faultbox.toxics.grpc_fault import GrpcFaultToxic
 from faultbox.toxics.http_error import HttpErrorToxic
 from faultbox.toxics.latency import LatencyToxic
+from faultbox.toxics.postgres_fault import PostgresFaultToxic
+from faultbox.toxics.redis_fault import RedisFaultToxic
 from faultbox.toxics.reset_peer import ResetPeerToxic
 from faultbox.toxics.slicer import SlicerToxic
 from faultbox.toxics.timeout import TimeoutToxic
@@ -29,6 +31,8 @@ TOXIC_REGISTRY: dict[str, type[BaseToxic]] = {
     "http_error": HttpErrorToxic,
     "grpc_fault": GrpcFaultToxic,
     "tls_fault": TlsFaultToxic,
+    "postgres_fault": PostgresFaultToxic,
+    "redis_fault": RedisFaultToxic,
 }
 
 

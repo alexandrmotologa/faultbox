@@ -1,6 +1,6 @@
 # Toxic Plugin Reference
 
-Toxics represent chaos rules injected into the data stream between a client and an upstream service. FaultBox includes eight built-in toxic types.
+Toxics represent chaos rules injected into the data stream between a client and an upstream service. FaultBox includes thirteen built-in toxic types across network, protocol, and database layers.
 
 ## General Configuration
 
@@ -227,5 +227,50 @@ Simulates SSL and TLS protocol failures, handshake stalls, and certificate valid
 ```bash
 faultbox toxic add https-proxy cert-error --type tls_fault --direction inbound --attributes '{"mode": "alert_bad_certificate"}'
 ```
+
+---
+
+## 12. PostgreSQL Wire Fault (`postgres_fault`)
+
+Intercepts PostgreSQL wire protocol v3.0 streams and injects synthetic backend `ErrorResponse` frames with standard SQLSTATE error codes and detail messages.
+
+### Attributes
+
+| Attribute | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `sqlstate` | string | `57P01` | Standard SQLSTATE code (e.g. `57P01` admin_shutdown, `40001` serialization_failure, `57014` query_canceled, `08006` connection_failure) |
+| `message` | string | auto | Diagnostic error message (defaults to standard PostgreSQL message for SQLSTATE) |
+| `severity` | string | `ERROR` | Severity level: `ERROR`, `FATAL`, or `PANIC` |
+| `detail` | string | `FaultBox synthetic chaos injected` | Optional detail string attached to the error frame |
+| `close_connection` | boolean | `false` | Whether to terminate connection socket after emitting error |
+| `match_query` | string | `""` | Substring query filter: only trigger when inbound client query matches |
+| `send_ready_for_query` | boolean | `true` | Append `ReadyForQuery` (`Z`) packet for non-fatal errors so driver state machine recovers |
+
+### Example
+
+```bash
+faultbox toxic add pg-proxy deadlock --type postgres_fault --direction outbound --attributes '{"sqlstate": "40001", "detail": "concurrent update conflict"}'
+```
+
+---
+
+## 13. Redis RESP Fault (`redis_fault`)
+
+Intercepts Redis protocol streams and injects synthetic RESP simple error frames (`-<TYPE> <message>\r\n`) representing replica failovers, script timeouts, and out-of-memory errors.
+
+### Attributes
+
+| Attribute | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `error_type` | string | `READONLY` | Error type prefix: `READONLY`, `BUSY`, `LOADING`, `CLUSTERDOWN`, `OOM`, `WRONGTYPE`, `ERR` |
+| `message` | string | auto | Custom error message (defaults to standard Redis message for the type) |
+| `match_command` | string | `""` | Optional command filter (e.g. `SET`, `HSET`): only trigger on matching commands |
+
+### Example
+
+```bash
+faultbox toxic add redis-proxy failover --type redis_fault --direction outbound --attributes '{"error_type": "READONLY", "match_command": "SET"}'
+```
+
 
 
