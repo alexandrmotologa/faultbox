@@ -205,3 +205,32 @@ class ProxyManager:
             for instance in self._proxies.values():
                 await instance.stop()
             self._proxies.clear()
+
+    def get_cluster_stats(self) -> dict[str, float | int]:
+        """Aggregate traffic and error statistics across all managed proxies."""
+        totals: dict[str, float | int] = {
+            "bytes_in": 0,
+            "bytes_out": 0,
+            "bytes_total": 0,
+            "connections_total": 0,
+            "connections_active": 0,
+            "errors_total": 0,
+            "error_rate": 0.0,
+        }
+        for p in self._proxies.values():
+            snap = p.stats.snapshot()
+            totals["bytes_in"] = int(totals["bytes_in"]) + int(snap["bytes_in"])
+            totals["bytes_out"] = int(totals["bytes_out"]) + int(snap["bytes_out"])
+            totals["connections_total"] = int(totals["connections_total"]) + int(
+                snap["connections_total"]
+            )
+            totals["connections_active"] = int(totals["connections_active"]) + int(
+                snap["connections_active"]
+            )
+            totals["errors_total"] = int(totals["errors_total"]) + int(snap["errors_total"])
+
+        totals["bytes_total"] = int(totals["bytes_in"]) + int(totals["bytes_out"])
+        conn_tot = int(totals["connections_total"])
+        if conn_tot > 0:
+            totals["error_rate"] = round(int(totals["errors_total"]) / conn_tot, 4)
+        return totals

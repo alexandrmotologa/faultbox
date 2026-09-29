@@ -6,7 +6,7 @@ import asyncio
 import time
 from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from faultbox.scenarios.schema import ScenarioConfig, ScenarioPhase
 from faultbox.toxics.factory import create_toxic
@@ -28,6 +28,20 @@ class PhaseEvent:
 
 
 @dataclass
+class AssertionResult:
+    """Result of evaluating a scenario SLA assertion."""
+
+    metric: str
+    operator: str
+    threshold: float
+    actual_value: float
+    passed: bool
+    target_proxy: str | None = None
+    description: str = ""
+    message: str = ""
+
+
+@dataclass
 class ScenarioReport:
     """Summary of scenario execution."""
 
@@ -36,7 +50,26 @@ class ScenarioReport:
     executed_phases: int
     duration_seconds: float
     events: list[PhaseEvent] = field(default_factory=list)
+    assertions: list[AssertionResult] = field(default_factory=list)
+    assertions_passed: bool = True
     success: bool = True
+
+
+def _evaluate_operator(actual: float, op: str, threshold: float) -> bool:
+    op = op.strip()
+    if op in ("<", "lt"):
+        return actual < threshold
+    if op in ("<=", "le", "=<"):
+        return actual <= threshold
+    if op in (">", "gt"):
+        return actual > threshold
+    if op in (">=", "ge", "=>"):
+        return actual >= threshold
+    if op in ("==", "=", "eq"):
+        return actual == threshold
+    if op in ("!=", "ne", "<>"):
+        return actual != threshold
+    raise ValueError(f"Unsupported assertion operator '{op}'")
 
 
 class ScenarioRunner:
@@ -53,7 +86,11 @@ class ScenarioRunner:
         self.on_event = on_event
 
     async def run(self) -> ScenarioReport:
-        """Run all phases in chronological order."""
+        """Run all phases in chronological order and evaluate assertions."""
+        # Snapshot baseline stats before scenario execution
+        baseline_proxies = {p.name: p.stats.snapshot() for p in self.manager.list_proxies()}
+        baseline_cluster = self.manager.get_cluster_stats()
+
         phases = sorted(self.scenario.phases, key=lambda p: p.time_seconds)
         events: list[PhaseEvent] = []
         start_time = time.perf_counter()
@@ -72,7 +109,51 @@ class ScenarioRunner:
                 self.on_event(event)
 
         duration = time.perf_counter() - start_time
-        all_success = all(e.success for e in events)
+        all_events_ok = all(e.success for e in events)
+
+        # Snapshot final stats after scenario completion
+        final_proxies = {p.name: p.stats.snapshot() for p in self.manager.list_proxies()}
+        final_cluster = self.manager.get_cluster_stats()
+
+        # Evaluate scenario assertions
+        assertion_results: list[AssertionResult] = []
+        for assertion in self.scenario.assertions:
+            target_name = assertion.target_proxy or self.scenario.target_proxy
+            if target_name:
+                init_snap = baseline_proxies.get(target_name, {})
+                final_snap = final_proxies.get(target_name, {})
+            else:
+                init_snap = baseline_cluster
+                final_snap = final_cluster
+
+            actual_val = self._calculate_metric(assertion.metric, init_snap, final_snap)
+            try:
+                passed = _evaluate_operator(actual_val, assertion.operator, assertion.threshold)
+                msg = (
+                    f"{assertion.metric} actual {actual_val} {assertion.operator} "
+                    f"threshold {assertion.threshold} -> {'PASS' if passed else 'FAIL'}"
+                )
+            except Exception as exc:
+                passed = False
+                msg = f"Error evaluating assertion: {exc}"
+
+            assertion_results.append(
+                AssertionResult(
+                    metric=assertion.metric,
+                    operator=assertion.operator,
+                    threshold=assertion.threshold,
+                    actual_value=actual_val,
+                    passed=passed,
+                    target_proxy=target_name,
+                    description=assertion.description,
+                    message=msg,
+                )
+            )
+
+        assertions_passed = (
+            all(a.passed for a in assertion_results) if assertion_results else True
+        )
+        total_success = all_events_ok and assertions_passed
 
         return ScenarioReport(
             name=self.scenario.name,
@@ -80,8 +161,76 @@ class ScenarioRunner:
             executed_phases=len(events),
             duration_seconds=round(duration, 3),
             events=events,
-            success=all_success,
+            assertions=assertion_results,
+            assertions_passed=assertions_passed,
+            success=total_success,
         )
+
+    def _calculate_metric(
+        self,
+        metric: str,
+        init_snap: dict[str, Any],
+        final_snap: dict[str, Any],
+    ) -> float:
+        """Calculate metric value or delta between baseline and final snapshots."""
+        metric = metric.lower().strip()
+        init_errors = float(init_snap.get("errors_total", 0))
+        final_errors = float(final_snap.get("errors_total", 0))
+        delta_errors = max(0.0, final_errors - init_errors)
+
+        init_conns = float(init_snap.get("connections_total", 0))
+        final_conns = float(final_snap.get("connections_total", 0))
+        delta_conns = max(0.0, final_conns - init_conns)
+
+        if metric in ("errors_total", "errors", "delta_errors"):
+            return delta_errors
+        if metric in ("errors_cumulative", "lifetime_errors"):
+            return final_errors
+
+        if metric in ("connections_total", "connections", "delta_connections"):
+            return delta_conns
+        if metric in ("connections_cumulative", "lifetime_connections"):
+            return final_conns
+
+        if metric in ("connections_active", "active_connections"):
+            return float(final_snap.get("connections_active", 0))
+
+        if metric in ("bytes_in", "delta_bytes_in"):
+            return max(
+                0.0, float(final_snap.get("bytes_in", 0)) - float(init_snap.get("bytes_in", 0))
+            )
+        if metric in ("bytes_in_cumulative",):
+            return float(final_snap.get("bytes_in", 0))
+
+        if metric in ("bytes_out", "delta_bytes_out"):
+            return max(
+                0.0, float(final_snap.get("bytes_out", 0)) - float(init_snap.get("bytes_out", 0))
+            )
+        if metric in ("bytes_out_cumulative",):
+            return float(final_snap.get("bytes_out", 0))
+
+        if metric in ("bytes_total", "delta_bytes_total"):
+            delta_in = max(
+                0.0, float(final_snap.get("bytes_in", 0)) - float(init_snap.get("bytes_in", 0))
+            )
+            delta_out = max(
+                0.0, float(final_snap.get("bytes_out", 0)) - float(init_snap.get("bytes_out", 0))
+            )
+            return delta_in + delta_out
+        if metric in ("bytes_total_cumulative",):
+            return float(final_snap.get("bytes_in", 0)) + float(final_snap.get("bytes_out", 0))
+
+        if metric in ("error_rate",):
+            if delta_conns > 0:
+                return round(delta_errors / delta_conns, 4)
+            return 0.0
+        if metric in ("error_rate_cumulative",):
+            if final_conns > 0:
+                return round(final_errors / final_conns, 4)
+            return 0.0
+
+        # Fallback to direct lookup in final snapshot
+        return float(final_snap.get(metric, 0.0))
 
     async def _execute_phase(self, phase: ScenarioPhase) -> PhaseEvent:
         proxy_name = phase.target_proxy or self.scenario.target_proxy or ""

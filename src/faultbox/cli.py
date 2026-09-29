@@ -364,14 +364,45 @@ def run_scenario_cmd(
             ),
         )
         report = await runner.run()
+
+        if report.assertions:
+            console.print("\n[bold]Quality Gate Assertions:[/bold]")
+            table = Table(title="Scenario Resilience SLA Verification", border_style="cyan")
+            table.add_column("SLA / Assertion", style="bold white")
+            table.add_column("Target", style="cyan")
+            table.add_column("Condition", justify="center")
+            table.add_column("Actual", justify="right")
+            table.add_column("Result", justify="center")
+
+            for a in report.assertions:
+                result_str = (
+                    "[bold green]PASS[/bold green]"
+                    if a.passed
+                    else "[bold red]FAIL[/bold red]"
+                )
+                actual_fmt = (
+                    f"{a.actual_value:.4f}".rstrip("0").rstrip(".")
+                    if isinstance(a.actual_value, float)
+                    else str(a.actual_value)
+                )
+                table.add_row(
+                    a.description or a.metric,
+                    a.target_proxy or "Cluster",
+                    f"{a.metric} {a.operator} {a.threshold}",
+                    actual_fmt,
+                    result_str,
+                )
+            console.print(table)
+
         if report.success:
             console.print(
-                f"\n[bold green]Scenario completed successfully[/bold green] in {report.duration_seconds}s"
+                f"\n[bold green]Scenario passed successfully[/bold green] in {report.duration_seconds}s"
             )
         else:
             console.print(
-                f"\n[bold red]Scenario finished with errors[/bold red] in {report.duration_seconds}s"
+                f"\n[bold red]Scenario failed quality gates[/bold red] in {report.duration_seconds}s"
             )
+            raise typer.Exit(1)
 
     asyncio.run(_exec())
 

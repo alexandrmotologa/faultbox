@@ -1,0 +1,42 @@
+name: "resilience-gate"
+description: "Simulates intermittent errors and validates SLA error thresholds with quality gate assertions"
+target_proxy: "api-gateway"
+phases:
+  - time_seconds: 0.0
+    action: "add_toxic"
+    toxic:
+      name: "controlled-jitter"
+      type: "latency"
+      direction: "inbound"
+      attributes:
+        latency_ms: 100
+        jitter_ms: 20
+
+  - time_seconds: 1.0
+    action: "add_toxic"
+    toxic:
+      name: "temporary-503"
+      type: "http_error"
+      direction: "outbound"
+      attributes:
+        status_code: 503
+        status_message: "Temporary Outage"
+
+  - time_seconds: 3.0
+    action: "reset"
+
+assertions:
+  - metric: "errors_total"
+    operator: "<="
+    threshold: 50
+    description: "Maximum allowable errors during chaos injection"
+
+  - metric: "error_rate"
+    operator: "<"
+    threshold: 0.5
+    description: "Chaos error rate must not exceed 50%"
+
+  - metric: "connections_active"
+    operator: "<="
+    threshold: 100
+    description: "No connection leaks after chaos reset"

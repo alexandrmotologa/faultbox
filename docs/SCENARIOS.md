@@ -53,19 +53,80 @@ Stops the target proxy from accepting new connections.
 ### 5. `resume`
 Restores the target proxy to operational state.
 
+## Quality Gates & Resilience SLA Assertions
+
+FaultBox scenarios support automated **Quality Gate Assertions**. You can define SLA thresholds directly in your scenario file. When running via `faultbox scenario run`, FaultBox evaluates every assertion, renders a structured verification report, and exits with code `0` (PASS) or `1` (FAIL), providing an instant pass/fail gate for CI/CD pipelines.
+
+```yaml
+name: "resilience-gate"
+description: "Injects latency and validates error budgets during chaos"
+target_proxy: "api-gateway"
+
+phases:
+  - time_seconds: 0.0
+    action: "add_toxic"
+    toxic:
+      name: "controlled-jitter"
+      type: "latency"
+      attributes:
+        latency_ms: 150
+
+  - time_seconds: 5.0
+    action: "reset"
+
+assertions:
+  - metric: "errors_total"
+    operator: "<="
+    threshold: 25
+    description: "Maximum allowable errors during chaos injection"
+
+  - metric: "error_rate"
+    operator: "<"
+    threshold: 0.05
+    description: "Chaos error rate SLA (< 5%)"
+
+  - metric: "connections_active"
+    operator: "=="
+    threshold: 0
+    description: "All client connections cleanly drained"
+```
+
+### Supported Metrics
+
+| Metric | Scope | Description |
+|---|---|---|
+| `errors_total` | Scenario Delta | Total socket/proxy errors incurred during scenario execution |
+| `errors_cumulative` | Cumulative | Lifetime errors recorded on target proxy |
+| `error_rate` | Scenario Delta | Ratio of delta errors to delta connections (`0.0` to `1.0`) |
+| `bytes_in` / `bytes_out` | Scenario Delta | Total inbound/outbound payload bytes during scenario |
+| `bytes_total` | Scenario Delta | Total combined network throughput during scenario |
+| `connections_total` | Scenario Delta | Number of new client connections opened during scenario |
+| `connections_active` | Point-in-time | Number of active client connections remaining at scenario end |
+
+### Comparison Operators
+
+- `<` / `lt` (Less than)
+- `<=` / `le` (Less than or equal)
+- `>` / `gt` (Greater than)
+- `>=` / `ge` (Greater than or equal)
+- `==` / `=` (Equal)
+- `!=` / `ne` (Not equal)
+
 ## Executing Scenarios
 
 ### Via CLI
 
-Run a scenario locally during application testing:
+Run a scenario locally or in CI pipelines:
 
 ```bash
-faultbox scenario run scenarios/flapping-service.yaml
+faultbox scenario run scenarios/resilience-gate.yaml
 ```
+
+If any assertion fails or an error occurs during execution, `faultbox scenario run` prints a highlighted Rich SLA table and terminates with **exit code 1**.
 
 ### Combined With `faultbox run`
 
-Launch the proxy listeners and immediately execute a scenario file:
+Launch proxy listeners and immediately execute a scenario file:
 
 ```bash
 faultbox run \
@@ -75,15 +136,12 @@ faultbox run \
 
 ### In Continuous Integration (CI)
 
-In a GitHub Actions or GitLab CI job, place FaultBox in the background, run integration tests against the proxy port, and observe how resilience mechanisms respond:
+In GitHub Actions or GitLab CI, validate system resilience against automated quality gates:
 
-```bash
-# 1. Start FaultBox proxy and execute the chaos schedule
-faultbox run \
-  --proxy "service:9000->service-internal:8000" \
-  --scenario scenarios/cascading-failure.yaml \
-  --api-port 8474 &
-
-# 2. Execute test suite against localhost:9000
-pytest tests/resilience/
+```yaml
+# GitHub Actions snippet
+- name: Run FaultBox Chaos Quality Gate
+  run: |
+    faultbox scenario run scenarios/resilience-gate.yaml
 ```
+

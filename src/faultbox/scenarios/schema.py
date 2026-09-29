@@ -30,6 +30,21 @@ class ScenarioPhase(BaseModel):
     toxic_name: str | None = Field(None, description="Toxic identifier when action is remove_toxic")
 
 
+class ScenarioAssertion(BaseModel):
+    """Assertion condition to validate resilience SLAs."""
+
+    metric: str = Field(
+        ...,
+        description="Metric name: errors_total, error_rate, bytes_in, bytes_out, bytes_total, connections_total, connections_active",
+    )
+    operator: str = Field(..., description="Comparison operator: <, <=, >, >=, ==, !=")
+    threshold: float = Field(..., description="Numeric boundary threshold value")
+    target_proxy: str | None = Field(
+        None, description="Optional target proxy; if None, evaluated against aggregate stats"
+    )
+    description: str = Field("", description="Human-readable SLA or assertion description")
+
+
 class ScenarioConfig(BaseModel):
     """Complete declarative chaos scenario definition."""
 
@@ -37,6 +52,7 @@ class ScenarioConfig(BaseModel):
     description: str = ""
     target_proxy: str | None = None
     phases: list[ScenarioPhase] = Field(default_factory=list)
+    assertions: list[ScenarioAssertion] = Field(default_factory=list)
 
     @classmethod
     def from_yaml_file(cls, path: str | Path) -> ScenarioConfig:
