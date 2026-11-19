@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import httpx
 import pytest
-from starlette.testclient import TestClient
+from fastapi.testclient import TestClient
 
 from faultbox.api.server import create_app
 from faultbox.core.proxy import ProxyManager

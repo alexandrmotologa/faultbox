@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "faultbox"
-version = "0.1.0"
+version = "0.1.1"
 description = "Programmable network and protocol chaos injection proxy"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -62,5 +62,6 @@ ignore = ["E501"]
 minversion = "8.0"
 addopts = "-ra -q --strict-markers"
 asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
 testpaths = ["tests"]
 pythonpath = ["src"]

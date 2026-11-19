@@ -53,6 +53,31 @@ def parse_proxy_spec(spec: str) -> tuple[str, str, str]:
     return name.strip(), listen.strip(), upstream.strip()
 
 
+def version_callback(value: bool) -> None:
+    """Callback for --version option."""
+    if value:
+        console.print(
+            f"[bold cyan]FaultBox[/bold cyan] version [bold green]{__version__}[/bold green]"
+        )
+        raise typer.Exit()
+
+
+@app.callback()
+def main(
+    version: Annotated[
+        bool | None,
+        typer.Option(
+            "--version",
+            "-v",
+            help="Show FaultBox version and exit.",
+            callback=version_callback,
+            is_eager=True,
+        ),
+    ] = None,
+) -> None:
+    """Programmable network and protocol chaos injection proxy."""
+
+
 @app.command()
 def version() -> None:
     """Show FaultBox version."""

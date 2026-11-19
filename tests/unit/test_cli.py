@@ -27,6 +27,13 @@ def test_cli_version() -> None:
     assert "FaultBox version" in result.stdout
 
 
+def test_cli_version_flags() -> None:
+    for flag in ["--version", "-v"]:
+        result = runner.invoke(app, [flag])
+        assert result.exit_code == 0
+        assert "FaultBox version" in result.stdout
+
+
 def test_cli_help() -> None:
     result = runner.invoke(app, ["--help"])
     assert result.exit_code == 0
